@@ -1,0 +1,46 @@
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+
+# Python build artifacts
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Test cache and coverage
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ChromaDB generated database
+/data/chroma/
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+

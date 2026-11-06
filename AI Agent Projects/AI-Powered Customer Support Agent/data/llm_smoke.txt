@@ -1,0 +1,4 @@
+﻿RET | intent=RETURN_POLICY lang=en srcs=FAQ, Return Policy, Exchange Policy
+RET | reply=Based on our FAQ: Once your order is dispatched, a tracking number is sent by email and SMS. You (Source: FAQ.) Can I help with anything else?
+WAR | intent=OTHER lang=en srcs=
+WAR | reply=I'm not sure I can answer that from what I have here, and I don't want to guess. You can share your order ID or the policy you're asking about, or I can connect you with a human support specialist.

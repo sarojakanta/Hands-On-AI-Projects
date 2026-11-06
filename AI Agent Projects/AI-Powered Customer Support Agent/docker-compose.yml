@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: ai-support-agent
+    ports:
+      - "5000:5000"
+    environment:
+      # Flask
+      - FLASK_ENV=development
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-change-in-production}
+      - HOST=0.0.0.0
+      - PORT=5000
+      - DEV_MODE=${DEV_MODE:-true}
+      
+      # LLM Provider
+      - LLM_PROVIDER=${LLM_PROVIDER:-auto}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - GROQ_MODEL=${GROQ_MODEL:-llama-3.1-70b-versatile}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-3-5-sonnet-20241022}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openai/gpt-4o-mini}
+      
+      # Database
+      - DATABASE_URL=sqlite:///data/support_agent.db
+      
+      # OTP
+      - DEV_OTP=${DEV_OTP:-123456}
+      - OTP_TTL_SECONDS=${OTP_TTL_SECONDS:-300}
+      - OTP_MAX_ATTEMPTS=${OTP_MAX_ATTEMPTS:-3}
+      
+      # Redis (optional)
+      - REDIS_URL=${REDIS_URL:-}
+      
+      # Ticket Provider
+      - TICKET_PROVIDER=${TICKET_PROVIDER:-local}
+    
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+  # Optional Redis for session storage
+  # Enable with: docker-compose --profile with-redis up
+  redis:
+    image: redis:7-alpine
+    container_name: ai-support-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    profiles:
+      - with-redis
+
+volumes:
+  redis_data:

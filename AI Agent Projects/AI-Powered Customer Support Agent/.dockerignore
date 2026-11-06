@@ -1,0 +1,50 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+*.pyc
+*.pyo
+*.so
+*.egg
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Data and logs
+# Keep all files in data/ and logs/ tracked in GitHub
+
+# ChromaDB
+chroma/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Documentation (optional - remove these rules to commit these files)
+test_llm_config.md
+ANTHROPIC_IMPLEMENTATION_COMPLETE.md
+TESTING_INDEPENDENCE.md

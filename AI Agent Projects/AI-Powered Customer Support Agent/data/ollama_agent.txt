@@ -1,0 +1,2 @@
+intent=RETURN_POLICY lang=en srcs=['FAQ', 'Return Policy', 'Exchange Policy']
+reply=According to our Return Policy, most items can be returned within 30 days of the delivery date for a full refund. If you return an item after 30 days but within 45 days, you'll be eligible for store credit only. I'm unsure about the specific rules for returns after 15 days. To clarify, I can offer you a human support specialist who can help you with your question. Would you like to speak with someone?

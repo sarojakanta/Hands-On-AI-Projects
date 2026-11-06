@@ -1,0 +1,250 @@
+:root {
+  --brand: #2563eb;
+  --brand-dark: #1d4ed8;
+  --bg: #f1f5f9;
+  --agent-bubble: #ffffff;
+  --user-bubble: #2563eb;
+  --border: #e2e8f0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: #0f172a;
+}
+
+.app-header {
+  background: var(--brand);
+  color: #fff;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-header h1 { font-size: 1.1rem; margin: 0; font-weight: 600; }
+
+.dev-badge {
+  background: #f59e0b;
+  color: #1f2937;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+}
+
+.dev-clear-session {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  padding: 5px 9px;
+  background: transparent;
+  color: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.dev-clear-session:hover { background: rgba(255, 255, 255, 0.15); }
+.dev-clear-session:disabled { opacity: 0.6; cursor: wait; }
+
+.chat-shell {
+  max-width: 760px;
+  margin: 24px auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 140px);
+}
+
+.chat-history {
+  flex: 1 1 auto;
+  min-height: 0;          /* allow the scroll area to shrink inside the flex column */
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f8fafc;
+}
+
+.msg {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  line-height: 1.45;
+  font-size: 0.94rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.msg.agent {
+  align-self: flex-start;
+  background: var(--agent-bubble);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: var(--user-bubble);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.msg .meta {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  opacity: 0.65;
+}
+
+.typing {
+  align-self: flex-start;
+  display: inline-flex;
+  gap: 4px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.typing span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #94a3b8; animation: blink 1.2s infinite both;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+.composer {
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  background: #fff;
+}
+
+.composer input {
+  flex: 1;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+}
+.composer input:focus { border-color: var(--brand); }
+
+.composer button {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.composer button:hover { background: var(--brand-dark); }
+.composer button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ---- OTP verification panel ---- */
+.otp-panel {
+  border-top: 2px solid #f59e0b;
+  background: #fffbeb;
+  padding: 14px 16px;
+  flex: 0 0 auto;            /* never shrink; sits above the composer */
+}
+.otp-panel[hidden] { display: none; }
+
+/* Dim the composer while verifying so it's clearly inactive. */
+.composer input:disabled,
+.composer button:disabled {
+  background: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.otp-head {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  color: #92400e;
+}
+
+.otp-hint {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.otp-dev-hint {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px dashed #f59e0b;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.otp-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.otp-row input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.92rem;
+  outline: none;
+}
+.otp-row input:focus { border-color: var(--brand); }
+
+.otp-row button {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.otp-row button:hover { background: var(--brand-dark); }
+.otp-row button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.otp-link {
+  background: none;
+  border: none;
+  color: var(--brand);
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.otp-feedback {
+  margin: 4px 0 0;
+  font-size: 0.84rem;
+  min-height: 1.1em;
+}
+.otp-feedback.error { color: #b91c1c; }
+.otp-feedback.success { color: #15803d; }
+
+/* AI disclosure tag in the header (G-5). */
+.ai-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.25);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-left: 6px;
+}

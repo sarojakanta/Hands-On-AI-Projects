@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DemoCartService Customer Support</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>DemoCartService Support Assistant <span class="ai-tag">AI</span></h1>
+    {% if dev_mode %}
+    <span class="dev-badge" title="Mock OTP is enabled. Development OTP is 123456.">
+      DEV MODE &middot; MOCK OTP
+    </span>
+    <button id="dev-clear-session" class="dev-clear-session" type="button"
+            title="Clear this app's session cookie and verified state">
+      Clear session (Dev mode)
+    </button>
+    {% endif %}
+  </header>
+
+  <main class="chat-shell">
+    <div id="chat-history" class="chat-history" aria-live="polite"></div>
+
+    <!-- OTP verification panel (hidden until verification is required). -->
+    <section id="otp-panel" class="otp-panel" hidden aria-live="polite">
+      <div class="otp-head">Identity verification</div>
+
+      <!-- Step 1: identify the customer by order or customer reference. -->
+      <div id="otp-step-identify" class="otp-step">
+        <p class="otp-hint">
+          To protect your account, please verify your identity. Enter your
+          order reference (or customer ID) to receive a one-time code.
+        </p>
+        <div class="otp-row">
+          <input id="otp-ref" type="text" placeholder="Order ID, e.g. UC-48213" aria-label="Order or customer reference" />
+          <button id="otp-send-btn" type="button">Send code</button>
+        </div>
+      </div>
+
+      <!-- Step 2: enter the OTP. -->
+      <div id="otp-step-verify" class="otp-step" hidden>
+        <p id="otp-sent-hint" class="otp-hint"></p>
+        {% if dev_mode %}
+        <p id="otp-dev-hint" class="otp-dev-hint" hidden></p>
+        {% endif %}
+        <div class="otp-row">
+          <input id="otp-code" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code" aria-label="One-time code" />
+          <button id="otp-verify-btn" type="button">Verify</button>
+        </div>
+        <button id="otp-resend-btn" type="button" class="otp-link">Resend code</button>
+      </div>
+
+      <p id="otp-feedback" class="otp-feedback" role="alert"></p>
+    </section>
+
+    <form id="composer" class="composer" autocomplete="off">
+      <input
+        id="message-input"
+        type="text"
+        placeholder="Type your message, e.g. 'Where is my order UC-48213?'"
+        aria-label="Message"
+      />
+      <button id="send-btn" type="submit">Send</button>
+    </form>
+  </main>
+
+  <script>
+    // Passed to the frontend so it can show dev-only affordances later.
+    window.APP_CONFIG = { devMode: {{ 'true' if dev_mode else 'false' }} };
+  </script>
+  <script src="{{ url_for('static', filename='js/otp.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>
