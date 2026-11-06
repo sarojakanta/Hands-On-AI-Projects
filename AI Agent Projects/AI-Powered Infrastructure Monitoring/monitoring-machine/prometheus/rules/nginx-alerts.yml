@@ -1,0 +1,36 @@
+# Nginx Alert Rules
+groups:
+  - name: nginx_health
+    interval: 30s
+    rules:
+      - alert: HighUpstreamResponseTime
+        expr: histogram_quantile(0.95, rate(nginx_upstream_response_time_seconds_bucket[5m])) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+          component: nginx
+        annotations:
+          summary: "High upstream response time on {{ $labels.instance }}"
+          description: "P95 response time is {{ $value }}s"
+          machine: "{{ $labels.machine }}"
+      
+      - alert: HighNginx5xxRate
+        expr: (rate(nginx_http_response_code_total{code=~"5.."}[5m]) / rate(nginx_http_response_code_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: nginx
+        annotations:
+          summary: "High 5xx error rate on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"
+      
+      - alert: HighNginxConnections
+        expr: nginx_connections_active > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: nginx
+        annotations:
+          summary: "High active connections on {{ $labels.instance }}"
+          description: "{{ $value }} active connections"
+          machine: "{{ $labels.machine }}"

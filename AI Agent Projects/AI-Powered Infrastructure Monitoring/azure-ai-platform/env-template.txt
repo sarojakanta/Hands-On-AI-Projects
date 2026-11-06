@@ -1,0 +1,14 @@
+# Azure OpenAI Configuration
+AZURE_OPENAI_API_KEY=your-azure-openai-api-key
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+
+# SQLite Database Configuration (file-based, no container needed)
+DB_PATH=data/incidents.db
+DB_MAX_SIZE_MB=100
+DB_ARCHIVE_PATH=data/archive
+
+# Monitoring Configuration
+MONITORING_API_KEY=your-secure-api-key
+
+# Application Configuration
+LOG_LEVEL=INFO

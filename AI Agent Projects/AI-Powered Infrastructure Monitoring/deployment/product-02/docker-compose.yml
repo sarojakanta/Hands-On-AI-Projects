@@ -1,0 +1,156 @@
+version: '3.8'
+
+services:
+  app:
+    build: ../../product-machine/application/app
+    container_name: product-02-app
+    environment:
+      - MACHINE_ID=product-02
+      - OTEL_ENDPOINT=otel-collector:4317
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/productdb
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "8002:8000"
+    networks:
+      - product-02
+      - monitoring
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    volumes:
+      - app-logs:/var/log/application
+
+  nginx:
+    image: nginx:alpine
+    container_name: product-02-nginx
+    volumes:
+      - ../../product-machine/application/config/nginx.conf:/etc/nginx/nginx.conf
+      - nginx-logs:/var/log/nginx
+    ports:
+      - "8081:80"
+    networks:
+      - product-02
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: product-02-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=productdb
+    volumes:
+      - ../../product-machine/application/config/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - product-02
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - max_connections=100
+      - -c
+      - shared_buffers=256MB
+
+  redis:
+    image: redis:7-alpine
+    container_name: product-02-redis
+    networks:
+      - product-02
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: product-02-node-exporter
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /:/host:ro,rslave
+    ports:
+      - "9101:9100"
+    networks:
+      - product-02
+      - monitoring
+    restart: unless-stopped
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: product-02-postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://postgres:postgres@postgres:5432/productdb?sslmode=disable
+    ports:
+      - "9188:9187"
+    networks:
+      - product-02
+      - monitoring
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: product-02-redis-exporter
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    ports:
+      - "9122:9121"
+    networks:
+      - product-02
+      - monitoring
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: product-02-nginx-exporter
+    command:
+      - '-nginx.scrape-uri=http://nginx/nginx_status'
+    ports:
+      - "9114:9113"
+    networks:
+      - product-02
+      - monitoring
+    depends_on:
+      - nginx
+    restart: unless-stopped
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: product-02-alloy
+    environment:
+      - MACHINE_ID=product-02
+    volumes:
+      - ../../product-machine/instrumentation/grafana-alloy/config.alloy:/etc/alloy/config.alloy
+      - app-logs:/var/log/application:ro
+      - nginx-logs:/var/log/nginx:ro
+    networks:
+      - product-02
+      - monitoring
+    restart: unless-stopped
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --server.http.listen-addr=0.0.0.0:12345
+
+networks:
+  product-02:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.1.2.0/24
+  monitoring:
+    external: true
+    name: deployment_monitoring
+
+volumes:
+  postgres-data:
+  app-logs:
+  nginx-logs:

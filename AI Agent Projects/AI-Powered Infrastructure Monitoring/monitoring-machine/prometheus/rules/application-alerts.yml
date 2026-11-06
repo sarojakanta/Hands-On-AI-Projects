@@ -1,0 +1,58 @@
+# Application Alert Rules
+groups:
+  - name: application_health
+    interval: 30s
+    rules:
+      - alert: ApplicationDown
+        expr: app_process_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "Application down on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"
+      
+      - alert: HighWorkerUtilization
+        expr: (app_worker_busy / app_worker_total) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: application
+        annotations:
+          summary: "High worker utilization on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"
+      
+      - alert: HighExceptionRate
+        expr: rate(app_exceptions_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: application
+        annotations:
+          summary: "High exception rate on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"
+
+  - name: api_performance
+    interval: 30s
+    rules:
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(api_request_duration_seconds_bucket[5m])) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API latency on {{ $labels.instance }}"
+          description: "P95 latency is {{ $value }}s"
+          machine: "{{ $labels.machine }}"
+      
+      - alert: HighAPIErrorRate
+        expr: (rate(api_http_5xx_total[5m]) / rate(api_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API error rate on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"

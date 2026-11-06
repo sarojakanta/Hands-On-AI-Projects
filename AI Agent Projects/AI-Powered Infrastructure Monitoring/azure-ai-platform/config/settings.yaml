@@ -1,0 +1,47 @@
+  # Azure AI Platform Configuration
+
+# Monitoring endpoints
+monitoring:
+  prometheus_url: "http://localhost:9090"
+  loki_url: "http://localhost:3100"
+  tempo_url: "http://localhost:3200"
+  api_key: "test-api-key-12345"
+
+# Azure OpenAI configuration
+openai:
+  api_key: "${AZURE_OPENAI_API_KEY}"
+  endpoint: "${AZURE_OPENAI_ENDPOINT}"
+  deployment_name: "gpt-4"
+  api_version: "2024-02-15-preview"
+  temperature: 0.1
+  max_tokens: 2000
+
+# SQLite Database (file-based incident storage)
+database:
+  path: "${DB_PATH:-data/incidents.db}"
+  max_size_mb: ${DB_MAX_SIZE_MB:-100}
+  archive_path: "${DB_ARCHIVE_PATH:-data/archive}"
+
+# Agent configuration
+agents:
+  max_retries: 3
+  timeout_seconds: 30
+  parallel_execution: true
+
+# Thresholds and detection
+thresholds:
+  cpu_warning: 80
+  cpu_critical: 95
+  memory_warning: 85
+  disk_warning: 85
+  connection_warning: 80
+  connection_critical: 95
+  api_latency_warning: 2.0
+  api_latency_critical: 5.0
+
+# Application settings
+app:
+  host: "0.0.0.0"
+  port: 8080
+  log_level: "INFO"
+  workers: 4

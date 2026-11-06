@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  azure-ai-agent:
+    build: .
+    container_name: azure-ai-agent
+    ports:
+      - "8085:8080"
+    environment:
+      # Azure OpenAI Configuration
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      
+      # Database Configuration
+      - DB_PATH=/app/data/incidents.db
+      - DB_MAX_SIZE_MB=${DB_MAX_SIZE_MB:-100}
+      - DB_ARCHIVE_PATH=/app/data/archive
+      
+      # Monitoring Configuration
+      - MONITORING_API_KEY=${MONITORING_API_KEY:-test-api-key-12345}
+      
+      # Application Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - CONFIG_PATH=/app/config/settings.yaml
+    
+    volumes:
+      # Persist database and archives
+      - agent-data:/app/data
+    
+    networks:
+      - ai-agent-network
+      - monitoring
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  ai-agent-network:
+    driver: bridge
+  monitoring:
+    external: true
+    name: deployment_monitoring
+
+volumes:
+  agent-data:
+    driver: local

@@ -1,0 +1,14 @@
+# Infrastructure Alert Rules
+groups:
+  - name: linux_infrastructure
+    interval: 30s
+    rules:
+      - alert: HighCPUUsage
+        expr: (100 - (avg by (instance, machine) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: linux
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"

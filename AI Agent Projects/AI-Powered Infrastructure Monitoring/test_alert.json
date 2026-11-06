@@ -1,0 +1,15 @@
+{
+  "alerts": [
+    {
+      "labels": {
+        "alertname": "HighDatabaseConnections",
+        "machine": "product-01",
+        "severity": "critical"
+      },
+      "annotations": {
+        "summary": "Database connections are at 95%"
+      },
+      "startsAt": "2026-11-06T03:00:00Z"
+    }
+  ]
+}

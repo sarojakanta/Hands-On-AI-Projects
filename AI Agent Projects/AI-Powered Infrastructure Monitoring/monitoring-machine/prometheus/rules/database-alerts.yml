@@ -1,0 +1,55 @@
+# Database Alert Rules
+groups:
+  - name: database_health
+    interval: 30s
+    rules:
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL down on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"
+      
+      - alert: HighDatabaseConnections
+        expr: (pg_stat_database_numbackends / pg_settings_max_connections) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High database connections on {{ $labels.instance }}"
+          description: "Connection usage at {{ $value | humanizePercentage }}"
+          machine: "{{ $labels.machine }}"
+      
+      - alert: CriticalDatabaseConnections
+        expr: (pg_stat_database_numbackends / pg_settings_max_connections) > 0.95
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Critical database connections on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"
+      
+      - alert: DatabaseLocks
+        expr: pg_locks_count{mode="ExclusiveLock"} > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Database locks detected on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"
+      
+      - alert: SlowQueries
+        expr: rate(pg_slow_queries_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow queries on {{ $labels.instance }}"
+          machine: "{{ $labels.machine }}"

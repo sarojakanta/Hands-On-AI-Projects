@@ -1,0 +1,48 @@
+{
+  "alerts": [
+    {
+      "labels": {
+        "alertname": "HighDatabaseConnections",
+        "machine": "product-01",
+        "severity": "critical"
+      },
+      "annotations": {
+        "summary": "Database connections at 95%"
+      },
+      "startsAt": "2026-11-06T04:00:00Z"
+    },
+    {
+      "labels": {
+        "alertname": "HighAPILatency",
+        "machine": "product-02",
+        "severity": "warning"
+      },
+      "annotations": {
+        "summary": "API latency above threshold"
+      },
+      "startsAt": "2026-11-06T04:05:00Z"
+    },
+    {
+      "labels": {
+        "alertname": "HighCPUUsage",
+        "machine": "product-01",
+        "severity": "warning"
+      },
+      "annotations": {
+        "summary": "CPU usage above 85%"
+      },
+      "startsAt": "2026-11-06T04:10:00Z"
+    },
+    {
+      "labels": {
+        "alertname": "HighMemoryUsage",
+        "machine": "product-03",
+        "severity": "critical"
+      },
+      "annotations": {
+        "summary": "Memory usage at 92%"
+      },
+      "startsAt": "2026-11-06T04:15:00Z"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+# Alertmanager Configuration
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'azure-ai-platform'
+  group_by: ['machine', 'component', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+  routes:
+    - match:
+        severity: critical
+      receiver: 'azure-ai-platform'
+      group_wait: 10s
+      group_interval: 2m
+      continue: true
+
+    - match:
+        severity: warning
+      receiver: 'azure-ai-platform'
+      group_wait: 30s
+      group_interval: 5m
+
+receivers:
+  - name: 'azure-ai-platform'
+    webhook_configs:
+      - url: 'http://azure-ai-agent:8080/api/v1/alerts/webhook'
+        send_resolved: true
+        http_config:
+          authorization:
+            type: Bearer
+            credentials: 'test-api-key-12345'
+        max_alerts: 0
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['machine', 'component']
+  
+  - source_match:
+      alertname: 'ApplicationDown'
+    target_match_re:
+      alertname: '^(HighAPILatency|HighWorkerUtilization)$'
+    equal: ['machine']

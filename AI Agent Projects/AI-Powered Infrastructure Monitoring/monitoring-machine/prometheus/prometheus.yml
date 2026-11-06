@@ -1,0 +1,228 @@
+# Prometheus Configuration
+# Monitors three independent product machines
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'production'
+    monitoring_system: 'aiops-platform'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load alerting rules
+rule_files:
+  - '/etc/prometheus/rules/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # ============================================
+  # PRODUCT MACHINE 01
+  # ============================================
+  
+  # Node Exporter - Linux metrics
+  - job_name: 'product-01-node'
+    static_configs:
+      - targets: ['product-01-node-exporter:9100']
+        labels:
+          instance: 'product-01'
+          machine: 'product-01'
+          environment: 'production'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # PostgreSQL Exporter
+  - job_name: 'product-01-postgres'
+    static_configs:
+      - targets: ['product-01-postgres-exporter:9187']
+        labels:
+          instance: 'product-01'
+          machine: 'product-01'
+          environment: 'production'
+    scrape_interval: 15s
+
+  # Redis Exporter (optional - will fail gracefully if not present)
+  - job_name: 'product-01-redis'
+    static_configs:
+      - targets: ['product-01-redis-exporter:9121']
+        labels:
+          instance: 'product-01'
+          machine: 'product-01'
+          environment: 'production'
+          optional: 'true'
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+    # Mark as optional component
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: component_optional
+        replacement: 'true'
+
+  # Application Metrics
+  - job_name: 'product-01-application'
+    static_configs:
+      - targets: ['product-01-app:8000']
+        labels:
+          instance: 'product-01'
+          machine: 'product-01'
+          environment: 'production'
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+
+  # Nginx Metrics
+  - job_name: 'product-01-nginx'
+    static_configs:
+      - targets: ['product-01-nginx-exporter:9113']
+        labels:
+          instance: 'product-01'
+          machine: 'product-01'
+          environment: 'production'
+    scrape_interval: 15s
+
+  # ============================================
+  # PRODUCT MACHINE 02
+  # ============================================
+  
+  - job_name: 'product-02-node'
+    static_configs:
+      - targets: ['product-02:9100']
+        labels:
+          instance: 'product-02'
+          machine: 'product-02'
+          environment: 'production'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  - job_name: 'product-02-postgres'
+    static_configs:
+      - targets: ['product-02:9187']
+        labels:
+          instance: 'product-02'
+          machine: 'product-02'
+          environment: 'production'
+    scrape_interval: 15s
+
+  - job_name: 'product-02-redis'
+    static_configs:
+      - targets: ['product-02:9121']
+        labels:
+          instance: 'product-02'
+          machine: 'product-02'
+          environment: 'production'
+          optional: 'true'
+    scrape_interval: 15s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: component_optional
+        replacement: 'true'
+
+  - job_name: 'product-02-application'
+    static_configs:
+      - targets: ['product-02:8000']
+        labels:
+          instance: 'product-02'
+          machine: 'product-02'
+          environment: 'production'
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+
+  - job_name: 'product-02-nginx'
+    static_configs:
+      - targets: ['product-02:9113']
+        labels:
+          instance: 'product-02'
+          machine: 'product-02'
+          environment: 'production'
+    scrape_interval: 15s
+
+  # ============================================
+  # PRODUCT MACHINE 03
+  # ============================================
+  
+  - job_name: 'product-03-node'
+    static_configs:
+      - targets: ['product-03:9100']
+        labels:
+          instance: 'product-03'
+          machine: 'product-03'
+          environment: 'production'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  - job_name: 'product-03-postgres'
+    static_configs:
+      - targets: ['product-03:9187']
+        labels:
+          instance: 'product-03'
+          machine: 'product-03'
+          environment: 'production'
+    scrape_interval: 15s
+
+  - job_name: 'product-03-redis'
+    static_configs:
+      - targets: ['product-03:9121']
+        labels:
+          instance: 'product-03'
+          machine: 'product-03'
+          environment: 'production'
+          optional: 'true'
+    scrape_interval: 15s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: component_optional
+        replacement: 'true'
+
+  - job_name: 'product-03-application'
+    static_configs:
+      - targets: ['product-03:8000']
+        labels:
+          instance: 'product-03'
+          machine: 'product-03'
+          environment: 'production'
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+
+  - job_name: 'product-03-nginx'
+    static_configs:
+      - targets: ['product-03:9113']
+        labels:
+          instance: 'product-03'
+          machine: 'product-03'
+          environment: 'production'
+    scrape_interval: 15s
+
+  # ============================================
+  # MONITORING STACK SELF-MONITORING
+  # ============================================
+  
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          instance: 'monitoring-machine'
+
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+        labels:
+          instance: 'monitoring-machine'
+
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          instance: 'monitoring-machine'
+
+  # AI Agent Platform
+  - job_name: 'ai-agents'
+    static_configs:
+      - targets: ['host.docker.internal:8085']
+        labels:
+          instance: 'ai-platform'
+          component: 'agents'
+    scrape_interval: 5s

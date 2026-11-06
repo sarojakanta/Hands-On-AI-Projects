@@ -1,0 +1,66 @@
+// Grafana Alloy Configuration
+// Collects logs and forwards to Loki
+
+// Discover log files
+local.file_match "application_logs" {
+  path_targets = [{
+    __path__ = "/var/log/application/*.log",
+    job      = "application",
+    machine  = env("MACHINE_ID"),
+  }]
+}
+
+local.file_match "nginx_logs" {
+  path_targets = [
+    {
+      __path__ = "/var/log/nginx/access.log",
+      job      = "nginx-access",
+      machine  = env("MACHINE_ID"),
+    },
+    {
+      __path__ = "/var/log/nginx/error.log",
+      job      = "nginx-error",
+      machine  = env("MACHINE_ID"),
+    },
+  ]
+}
+
+// Read application logs
+loki.source.file "application" {
+  targets    = local.file_match.application_logs.targets
+  forward_to = [loki.process.application.receiver]
+}
+
+// Process application logs (JSON parsing)
+loki.process "application" {
+  stage.json {
+    expressions = {
+      level     = "level",
+      timestamp = "timestamp",
+      message   = "message",
+      logger    = "logger",
+    }
+  }
+
+  stage.labels {
+    values = {
+      level  = "",
+      logger = "",
+    }
+  }
+
+  forward_to = [loki.write.default.receiver]
+}
+
+// Read nginx logs
+loki.source.file "nginx" {
+  targets    = local.file_match.nginx_logs.targets
+  forward_to = [loki.write.default.receiver]
+}
+
+// Write to Loki
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
