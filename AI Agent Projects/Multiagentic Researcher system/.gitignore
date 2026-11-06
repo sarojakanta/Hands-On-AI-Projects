@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+dist/
+build/
+*.egg-info/
+
+# Design/architecture document — kept local, not pushed to GitHub
+docs/DESIGN.md

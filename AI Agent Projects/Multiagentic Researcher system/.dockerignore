@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local secrets and env (never bake into the image)
+.env
+
+# Tests and dev artifacts
+tests/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Version control and editor
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# OS cruft
+.DS_Store
+Thumbs.db
