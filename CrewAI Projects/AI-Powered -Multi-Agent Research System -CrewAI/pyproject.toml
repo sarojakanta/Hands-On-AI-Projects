@@ -1,0 +1,30 @@
+[project]
+name = "ai_powered_multi_agent_research_system_using_crewai"
+version = "0.1.0"
+description = "ai_powered_multi_agent_research_system_using_crewai using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[file-processing,litellm,tools]>=1.15.28,<2.0.0",
+    "exa-py",
+    "pydantic",
+]
+
+[project.scripts]
+ai_powered_multi_agent_research_system_using_crewai = "ai_powered_multi_agent_research_system_using_crewai.main:run"
+run_crew = "ai_powered_multi_agent_research_system_using_crewai.main:run"
+train = "ai_powered_multi_agent_research_system_using_crewai.main:train"
+replay = "ai_powered_multi_agent_research_system_using_crewai.main:replay"
+test = "ai_powered_multi_agent_research_system_using_crewai.main:test"
+run_with_trigger = "ai_powered_multi_agent_research_system_using_crewai.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
+project_id = "3238ba7b-7ec2-4303-9639-cb6d50a6907e"
+
+[tool.uv]
+override-dependencies = ["litellm<=1.82.6"]

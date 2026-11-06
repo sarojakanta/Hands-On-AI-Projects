@@ -1,0 +1,119 @@
+---
+create_research_plan:
+  description: 'Create a research plan for topic {research_topic} with objectives
+    {objectives}, for audience {audience}. Break it into subtopics and answerable
+    research questions, define the methodology, and write explicit assignments for
+    the Web Researcher, Literature Reviewer and Technical Analyst. Each assignment
+    must be self-contained, so that further analysis agents (e.g. a data or experiment
+    agent) can later be added as extra assignments without changing existing ones.
+    Output a structured ResearchPlan JSON with these fields: objective, research_questions
+    (list), subtopics (list), methodology, assignments (list of objects with agent,
+    questions and deliverable), and success_criteria. Do not state facts or cite sources
+    here.'
+  expected_output: A valid ResearchPlan JSON with objective, research_questions, subtopics,
+    methodology, assignments per agent, and success_criteria.
+  agent: research_director
+collect_web_evidence:
+  description: 'Using the Web Researcher assignment in the research plan, search the
+    web for credible sources on {research_topic}. For each research question, collect
+    articles, technical documentation and reports. Read the pages and record each
+    item as an EvidenceItem with these fields: id, claim, source_url, publication_date,
+    verbatim quote, source_type and research_question. Include contradicting sources
+    where found. If nothing is found for a question, record "no data found" for it.
+    Never fabricate URLs, dates, quotes or numbers. Record only evidence here, with
+    no opinions.'
+  expected_output: A JSON list of EvidenceItem records with real URLs, dates (or "unknown")
+    and verbatim quotes, grouped by research question, plus a list of unanswered questions.
+  agent: web_researcher
+  async_execution: true
+  context:
+  - create_research_plan
+review_literature:
+  description: 'Using the Literature Reviewer assignment in the research plan, find
+    and analyse academic papers on {research_topic}, plus any documents or PDFs at
+    {document_urls} (if none are given, rely on paper search only). Identify existing
+    approaches, key findings, methodology differences and research gaps. Output structured
+    Finding records with these fields: id, statement, paper title, authors, url, year,
+    evidence quote, and a flag marking evidence or opinion. Keep reported findings
+    separate from your own synthesis. Never invent papers or results.'
+  expected_output: 'A structured literature review: a list of papers with URLs, findings,
+    a methodology comparison, and research gaps. Evidence and synthesis are clearly
+    separated.'
+  agent: literature_reviewer
+  async_execution: true
+  context:
+  - create_research_plan
+analyse_technical_options:
+  description: Using the Technical Analyst assignment in the research plan, identify
+    and compare the technologies, frameworks and architectures relevant to {research_topic}.
+    For each option give documented advantages, disadvantages, implementation challenges
+    and source URLs. Then give a comparison table and a clearly labelled opinion section
+    with your assessment. Never invent benchmarks or statistics.
+  expected_output: A source-backed technical comparison with a table, per-option pros,
+    cons and challenges with URLs, and a separate labelled opinion section.
+  agent: technical_analyst
+  async_execution: true
+  context:
+  - create_research_plan
+critically_review_findings:
+  description: 'Independently review the research plan, web evidence, literature review
+    and technical analysis on {research_topic}. Identify weak arguments, contradictory
+    evidence, unsupported conclusions and unanswered research questions. Output a
+    ReviewVerdict JSON with these fields: issues, contradictions, gaps, sufficient
+    (true or false), and follow_up_requests (which agent, which question). Say sufficient
+    is false only if gaps would materially change the conclusions. Allow at most {max_review_iterations}
+    review rounds. If that limit is reached, set sufficient to true and list the remaining
+    gaps as limitations.'
+  expected_output: A ReviewVerdict JSON with issues, contradictions, gaps, the sufficient
+    flag, and follow-up research requests naming the agent and question.
+  agent: critical_reviewer
+  context:
+  - create_research_plan
+  - collect_web_evidence
+  - review_literature
+  - analyse_technical_options
+fact_check_claims:
+  description: 'Verify the most important claims and citations used in the research
+    on {research_topic}. Open the original source URLs from the web evidence, literature
+    review and technical analysis. Confirm the quote, date and relevance for each.
+    Output FactCheckResult records with these fields: claim_id, source_url, status
+    (verified, unsupported or unverifiable) and note. Flag dead links, mismatched
+    quotes and potentially hallucinated items. Never mark a claim verified without
+    having read it in the source.'
+  expected_output: A JSON list of FactCheckResult records and a summary listing the
+    claims that must be removed or qualified in the final report.
+  agent: fact_checker
+  context:
+  - collect_web_evidence
+  - review_literature
+  - analyse_technical_options
+  - critically_review_findings
+write_final_report:
+  description: 'Write the final research report on {research_topic} for {audience},
+    using only the validated material. Exclude or clearly qualify claims the fact-check
+    marked unsupported or unverifiable. Include these sections: executive summary,
+    research objective, research questions, methodology, sources and references, literature
+    review, technical comparison, data analysis (include only if analysis results
+    were supplied, otherwise state "not performed"), experiment results (same rule),
+    contradictory evidence, fact-checking results, limitations, conclusions and recommendations,
+    and a references list with clickable Markdown URLs. Keep evidence and opinion
+    visibly separate. Add no sources, statistics or results that were not provided.'
+  expected_output: A complete structured Markdown research report with all required
+    sections, clickable reference URLs, and a closing human review and approval section.
+  agent: report_writer
+  context:
+  - create_research_plan
+  - collect_web_evidence
+  - review_literature
+  - analyse_technical_options
+  - critically_review_findings
+  - fact_check_claims
+send_email:
+  description: Using the summary from the previous step, send an email to {recipient_email}
+    with the subject "{email_subject}" and the summary as the email body. Format it
+    cleanly and professionally.
+  expected_output: Expected output of the Confirmation that the email was successfully
+    sent to {recipient_email}.he task
+  agent: email_sender
+  context:
+  - write_final_report
