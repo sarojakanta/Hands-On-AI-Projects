@@ -1,0 +1,25 @@
+[project]
+name = "hr_interview_agent"
+version = "0.1.0"
+description = "hr_interview_agent using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[file-processing,litellm,tools]>=1.15.28,<2.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hr_interview_agent"]
+
+[tool.crewai]
+type = "flow"
+definition = "src/hr_interview_agent/flow.json"
+project_id = "2b3da6cf-d3df-410e-9514-c9ecbefac2cb"
+
+[tool.uv]
+override-dependencies = ["litellm<=1.82.6"]
+constraint-dependencies = ["crewai==1.15.28"]

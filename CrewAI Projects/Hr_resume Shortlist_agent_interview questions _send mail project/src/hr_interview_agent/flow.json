@@ -1,0 +1,209 @@
+{
+  "name": "HRInterviewAgent",
+  "state": {
+    "type": "json_schema",
+    "json_schema": {
+      "type": "object",
+      "required": [
+        "job_description",
+        "resume_url",
+        "resume_text",
+        "match_threshold",
+        "hr_email",
+        "job_id"
+      ],
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "Unique job identifier for this role, used in the sheet and email subject. e.g. JOB-2024-001"
+        },
+        "hr_email": {
+          "type": "string",
+          "description": "HR manager's email address to receive the candidate report and interview questions. e.g. hr@yourcompany.com"
+        },
+        "resume_url": {
+          "type": "string",
+          "description": "URL of the candidate's resume PDF"
+        },
+        "resume_text": {
+          "type": "string",
+          "description": "Full text of the candidate's resume, pasted directly (optional if resume_url is provided)"
+        },
+        "job_description": {
+          "type": "string",
+          "description": "Full text of the job description"
+        },
+        "match_threshold": {
+          "type": "integer",
+          "default": 60,
+          "description": "Minimum JD match percentage (0–100) to qualify a candidate for interview. e.g. 60"
+        }
+      }
+    }
+  },
+  "schema": "crewai.flow/v1",
+  "methods": {
+    "match_jd": {
+      "do": {
+        "call": "agent",
+        "with": {
+          "goal": "Compare the candidate's extracted profile against the job description and produce a match percentage score with reasoning.",
+          "role": "JD Match Analyst",
+          "input": "Candidate Profile:\n${outputs.parse_resume.raw}\n\nJob Description:\n${state.job_description}\n\nQualification Threshold: ${state.match_threshold}%\n\nCompare the candidate's name, years of experience, and skills against the job description requirements. Calculate a match percentage (0-100%) based on how well the candidate's skills and experience align with the JD requirements.\n\nReturn the result in this exact format:\nCandidate Name: <name>\nYears of Experience: <number>\nSkills: <comma-separated list>\nMobile: <mobile number>\nEmail: <email address>\nJD Match: <percentage>%\nMatch Reasoning: <brief explanation of what matched and what was missing>\n\nExpected output: A structured candidate-to-JD comparison including name, experience, skills, mobile, email, JD match percentage (0-100%), and match reasoning. If the input profile contains NO DATA, output: NO DATA: resume returned nothing",
+          "verbose": true,
+          "backstory": "You are an expert HR analyst who compares candidate profiles to job descriptions. You work only from the information provided to you — you never assume or invent skills or experience. If the candidate profile contains NO DATA, you report NO DATA: resume returned nothing and stop.",
+          "inject_date": true,
+          "llm": "openai/gpt-5.6-luna"
+        }
+      },
+      "start": false,
+      "listen": "parse_resume",
+      "router": false,
+      "description": "Compares the extracted candidate profile against the job description and calculates a match percentage using the configurable threshold."
+    },
+    "flag_low_fit": {
+      "do": {
+        "call": "agent",
+        "with": {
+          "goal": "Produce a concise low-fit summary for a candidate who did not meet the minimum match threshold for this role.",
+          "role": "HR Screening Specialist",
+          "input": "Candidate Analysis:\n${outputs.match_jd.raw}\n\nQualification Threshold: ${state.match_threshold}%\n\nThis candidate scored below the ${state.match_threshold}% match threshold for this role. Produce a concise low-fit summary in this format:\n\n=== CANDIDATE SCREENING RESULT ===\nCandidate: <name>\nExperience: <years>\nSkills: <skills list>\nJD Match: <percentage>%\nStatus: LOW FIT — Does not meet minimum threshold (${state.match_threshold}%)\nReason: <brief explanation of key gaps>\n=================================\n\nExpected output: A concise low-fit screening summary including the candidate's name, experience, skills, match percentage, status as LOW FIT, and a brief explanation of the key gaps relative to the job description.",
+          "verbose": true,
+          "backstory": "You are an HR screening specialist who documents screening decisions clearly and professionally. You report only from the provided analysis — never inventing scores or details.",
+          "inject_date": true,
+          "llm": "openai/gpt-5.6-luna"
+        }
+      },
+      "start": false,
+      "listen": "low_fit",
+      "router": false,
+      "description": "Produces a brief low-fit notification for candidates who scored below the configurable match threshold."
+    },
+    "parse_resume": {
+      "do": {
+        "call": "agent",
+        "with": {
+          "goal": "Read the candidate's resume and extract structured information including the candidate's full name, total years of professional experience, a list of technical and professional skills, mobile number, and email address.",
+          "role": "Resume Parser",
+          "input": "You have two possible resume sources. Use whichever is provided:\n\nResume URL: ${state.resume_url}\nResume Text (pasted directly): ${state.resume_text}\n\nIf Resume Text is provided and non-empty, use it directly — do not attempt to fetch the URL.\nIf Resume Text is empty or blank, fetch and read the resume from the Resume URL above.\n\nFrom whichever source you use, extract the following:\n1. Candidate full name\n2. Total years of professional experience\n3. List of technical and professional skills\n4. Mobile number\n5. Email address\n\nReturn the result in this EXACT format (do not omit any field):\nCandidate Name: <name or NOT FOUND>\nYears of Experience: <number or NOT FOUND>\nSkills: <comma-separated list or NOT FOUND>\nMobile: <mobile number or NOT FOUND>\nEmail: <email address or NOT FOUND>\n\nOnly use information explicitly stated in the resume. If neither source contains readable content, output: NO DATA: resume returned nothing\n\nExpected output: Structured candidate profile with name, years of experience, skills, mobile number, and email address extracted verbatim from the resume — all five fields present in the exact format specified. If the document is missing or unreadable, output: NO DATA: resume returned nothing",
+          "tools": [
+            "crewai_tools:URLReadTool"
+          ],
+          "verbose": true,
+          "backstory": "You are a precise resume parsing specialist. You extract only facts that are explicitly stated in the resume document. You never infer, estimate, or fabricate information. If the resume content is missing or empty, you report NO DATA: resume returned nothing and stop.",
+          "inject_date": true,
+          "llm": "openai/gpt-5.6-luna"
+        }
+      },
+      "start": true,
+      "router": false,
+      "description": "Reads the candidate's resume — either from a URL or directly pasted text — and extracts name, years of experience, skills, mobile number, and email address."
+    },
+    "update_sheet": {
+      "do": {
+        "call": "agent",
+        "with": {
+          "apps": [
+            "google_sheets/get_sheet_names@private",
+            "google_sheets/lookup_spreadsheet_row@private",
+            "google_sheets/append_values@private"
+          ],
+          "goal": "Append a new row to the candidates Google Sheet with the shortlisted candidate's Job ID, name, years of experience, mobile number, email address, and status.",
+          "role": "Google Sheets Data Entry Specialist",
+          "input": "Candidate Analysis:\n${outputs.match_jd.raw}\n\nJob ID: ${state.job_id}\nSpreadsheet ID: 1PIhTu4Sd9KHkzv1acJWZxP990d4W_ePdGlFaR7ZMHeE\n\nFrom the candidate analysis above, extract: Name, Years of Experience, Mobile, Email.\n\nSteps:\n1. Call get_sheet_names with spreadsheet_id='1PIhTu4Sd9KHkzv1acJWZxP990d4W_ePdGlFaR7ZMHeE' to discover the exact sheet tab name (e.g. 'Sheet1'). Use this tab name in all subsequent range references (e.g. 'Sheet1!A:A').\n2. Call lookup_spreadsheet_row to search for the candidate's email in the Email column using the range '<tab_name>!D:D' (column D holds Email). If a matching row is found, skip writing and report that the candidate was already recorded.\n3. If not already present, call append_values with spreadsheet_id='1PIhTu4Sd9KHkzv1acJWZxP990d4W_ePdGlFaR7ZMHeE', range='<tab_name>!A:F', and values=[[Job ID, Name, Years of Experience, Mobile, Email, 'Shortlisted']].\n\nIf mobile, email, or years of experience is NOT FOUND in the analysis, write NOT FOUND in that cell.\n\nExpected output: Confirmation that a new row was appended to the Google Sheet (ID: 1PIhTu4Sd9KHkzv1acJWZxP990d4W_ePdGlFaR7ZMHeE) with the candidate's Job ID, Name, Years of Experience, Mobile, Email, and Status = Shortlisted. If the candidate was already in the sheet, report that they were skipped. If input contained NO DATA, report that nothing was written.",
+          "verbose": true,
+          "backstory": "You are a data entry specialist who accurately records candidate screening results into Google Sheets. You work only from the information provided to you — you never invent or guess values. If any field such as mobile or email is marked NOT FOUND in the input, write NOT FOUND in that cell. If the input contains NO DATA, do not write anything to the sheet and report that nothing was written.",
+          "inject_date": true,
+          "llm": "openai/gpt-5.6-luna"
+        }
+      },
+      "start": false,
+      "listen": "produce_final_report",
+      "router": false,
+      "description": "Appends a new row to the Google Sheet with the candidate's Job ID, Name, Mobile, Email, Years of Experience, and Status as Shortlisted."
+    },
+    "send_hr_email": {
+      "do": {
+        "call": "agent",
+        "with": {
+          "apps": [
+            "gmail/send-email@private"
+          ],
+          "goal": "Send the final candidate report and tailored interview questions to the HR manager's email address with a subject line formatted as JobID_CandidateName-Shortlisted.",
+          "role": "HR Communications Agent",
+          "input": "HR Manager Email: ${state.hr_email}\nJob ID: ${state.job_id}\n\nMatch JD Analysis (primary source for candidate name):\n${outputs.match_jd.raw}\n\nFinal Candidate Report:\n${outputs.produce_final_report.raw}\n\nSteps:\n1. Extract the candidate's name from the Match JD Analysis above (look for the line 'Candidate Name: <name>'). If not found, check the Final Candidate Report. If still not found, use 'UnknownCandidate'.\n2. Format the subject line as: ${state.job_id}_<CandidateName>-Shortlisted (remove any spaces from the candidate name, e.g. JohnDoe not John Doe).\n3. Send an email to ${state.hr_email} with:\n   - Subject: ${state.job_id}_<CandidateName>-Shortlisted\n   - Body: The full Final Candidate Report above, formatted clearly with the candidate's name, experience, skills, JD match percentage, and the tailored interview questions.\n\nIf the final report contains NO DATA or only error messages, do not send anything and report that no email was sent due to missing candidate data.\n\nExpected output: Confirmation that the candidate report email was sent to the HR manager at the specified address, including the exact subject line used (formatted as JobID_CandidateName-Shortlisted). If the candidate name was not found in either source, confirm the email was sent with 'UnknownCandidate' as the name. If the input contained NO DATA, report that no email was sent and state the reason.",
+          "verbose": true,
+          "backstory": "You are an HR communications specialist who delivers candidate screening results to hiring managers. You work only from the information provided. The candidate's name must be extracted first from the Match JD Analysis (look for the line starting with 'Candidate Name:'), and if not found there, try the Final Report. If the candidate name is still not found, use 'UnknownCandidate' as the name placeholder. Never refuse to send the email due to a missing name — always fall back to UnknownCandidate. If the entire candidate report contains NO DATA, do not send the email and report that nothing was sent because the source returned no data.",
+          "inject_date": true,
+          "llm": "openai/gpt-5.6-luna"
+        }
+      },
+      "start": false,
+      "listen": "update_sheet",
+      "router": false,
+      "description": "Sends the final candidate report and tailored interview questions to the HR manager via Gmail, with subject formatted as JobID_CandidateName-Shortlisted."
+    },
+    "route_by_match": {
+      "do": {
+        "call": "agent",
+        "with": {
+          "goal": "Read the JD Match percentage from the candidate analysis and the qualification threshold, then return exactly one bare value: qualified (if match is at or above the threshold) or low_fit (if match is below the threshold). Do not include any explanation, punctuation, or extra text.",
+          "role": "Candidate Router",
+          "input": "Candidate Analysis:\n${outputs.match_jd.raw}\n\nQualification Threshold: ${state.match_threshold}%\n\nIf the JD Match percentage is greater than or equal to ${state.match_threshold}%, return: qualified\nIf the JD Match percentage is less than ${state.match_threshold}%, return: low_fit\n\nExpected output: Exactly one word: qualified or low_fit",
+          "verbose": true,
+          "backstory": "You are a precise routing agent. You read the JD Match percentage and the threshold from the input and return only the routing decision word.",
+          "inject_date": true,
+          "llm": "openai/gpt-5.6-luna"
+        }
+      },
+      "emit": [
+        "qualified",
+        "low_fit"
+      ],
+      "start": false,
+      "listen": "match_jd",
+      "router": true,
+      "description": "Routes the candidate based on the configurable JD match threshold: at or above proceeds to interview question generation; below is flagged as low-fit."
+    },
+    "produce_final_report": {
+      "do": {
+        "call": "agent",
+        "with": {
+          "apps": [
+            "google_sheets@private"
+          ],
+          "goal": "Compile a clean, professional final candidate report combining the match analysis and interview questions.",
+          "role": "HR Report Compiler",
+          "input": "Candidate Analysis:\n${outputs.match_jd.raw}\n\nInterview Questions:\n${outputs.generate_interview_questions.raw}\n\nCompile a final candidate report in this format:\n\n=== CANDIDATE REPORT ===\nCandidate: <name>\nExperience: <years>\nSkills: <skills list>\nJD Match: <percentage>%\n\n--- Interview Questions ---\n<numbered list of interview questions>\n========================\n\nExpected output: A complete, well-formatted candidate report including the candidate's name, experience, skills, JD match percentage, and tailored interview questions. If any source data was unavailable, clearly state that in plain language without inventing replacement values.",
+          "verbose": true,
+          "backstory": "You are an HR reporting specialist who assembles structured candidate evaluation reports for hiring managers. You present only the information provided to you \\ never inventing scores, names, or questions. If any input section says NO DATA, you clearly state in plain language that the source document returned nothing, rather than making up values.",
+          "inject_date": true,
+          "llm": "openai/gpt-5.6-luna"
+        }
+      },
+      "start": false,
+      "listen": "generate_interview_questions",
+      "router": false,
+      "description": "Compiles the full candidate report: name, experience, skills, JD match percentage, and interview questions."
+    },
+    "generate_interview_questions": {
+      "do": {
+        "call": "agent",
+        "with": {
+          "goal": "Generate targeted, role-specific interview questions tailored to the candidate's skills and experience gaps relative to the job description.",
+          "role": "Interview Question Specialist",
+          "input": "Candidate Analysis:\n${outputs.match_jd.raw}\n\nJob Description:\n${state.job_description}\n\nGenerate 5-8 tailored interview questions for this candidate. Include a mix of:\n- Technical questions probing their listed skills\n- Behavioral questions relevant to the role\n- Questions that explore any gaps between their profile and the JD requirements\n\nFormat as a numbered list.\n\nExpected output: A numbered list of 5-8 tailored interview questions specific to the candidate's profile and job description. Questions should cover technical depth, behavioral fit, and any identified skill gaps.",
+          "verbose": true,
+          "backstory": "You are a senior HR interview strategist. You craft insightful interview questions that probe both the candidate's strengths and areas where they may not fully meet the job requirements. You work only from the provided candidate profile and job description — you never invent skills or requirements.",
+          "inject_date": true,
+          "llm": "openai/gpt-5.6-luna"
+        }
+      },
+      "start": false,
+      "listen": "qualified",
+      "router": false,
+      "description": "For qualified candidates, generates tailored interview questions based on the resume and job description."
+    }
+  },
+  "description": "Automates HR resume screening: parses candidate resumes, matches skills against a job description, routes qualified candidates to tailored interview question generation, and produces a full candidate report."
+}
