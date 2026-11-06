@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Admin Login — BizAssist{% endblock %}
+{% block body %}
+<div class="d-flex align-items-center justify-content-center min-vh-100">
+  <div class="card shadow-sm" style="width: 100%; max-width: 380px;">
+    <div class="card-body p-4">
+      <div class="text-center mb-4">
+        <h1 class="h4 fw-bold mb-1">BizAssist</h1>
+        <p class="text-muted small mb-0">Admin Dashboard</p>
+      </div>
+      <div id="error" class="alert alert-danger py-2 small d-none" role="alert"></div>
+      <form id="loginForm">
+        <div class="mb-3">
+          <label for="email" class="form-label small">Email</label>
+          <input type="email" class="form-control" id="email" required
+                 value="admin@sgenacademy.example" autocomplete="username" />
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label small">Password</label>
+          <input type="password" class="form-control" id="password" required
+                 autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Sign in</button>
+      </form>
+      <p class="text-muted small text-center mt-3 mb-0">
+        Demo: admin@sgenacademy.example / admin12345
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const form = document.getElementById("loginForm");
+  const errorBox = document.getElementById("error");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorBox.classList.add("d-none");
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Login failed");
+      }
+      window.location.href = "/admin";
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.remove("d-none");
+    }
+  });
+</script>
+{% endblock %}

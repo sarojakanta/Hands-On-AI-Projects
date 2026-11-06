@@ -1,0 +1,35 @@
+# Virtualenvs & caches
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# VCS & local config
+.git/
+.gitignore
+.dockerignore
+
+# Secrets & local data (never bake into the image)
+.env
+*.env
+!.env.example
+*.db
+*.sqlite3
+chroma_store/
+knowledge_base/uploads/
+
+# Tests are not needed in the runtime image
+tests/
+pytest.ini
+
+# Docs (keep README; ARCHITECTURE.md and others are excluded by *.md)
+*.md
+!README.md
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

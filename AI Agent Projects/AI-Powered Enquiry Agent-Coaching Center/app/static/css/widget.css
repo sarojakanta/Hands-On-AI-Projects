@@ -1,0 +1,217 @@
+/* BizAssist embeddable chat widget. All classes namespaced with bz- to
+   avoid clashing with the host website's styles. */
+
+.bz-widget * {
+  box-sizing: border-box;
+}
+
+.bz-launcher {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--bz-accent, #2563eb);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2147483000;
+  transition: transform 0.15s ease;
+}
+.bz-launcher:hover {
+  transform: scale(1.06);
+}
+
+.bz-panel {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 370px;
+  max-width: calc(100vw - 40px);
+  height: 560px;
+  max-height: calc(100vh - 120px);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2147483000;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.bz-panel.bz-open {
+  display: flex;
+}
+
+.bz-header {
+  background: var(--bz-accent, #2563eb);
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.bz-header-title {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+}
+.bz-header-sub {
+  font-size: 11px;
+  opacity: 0.85;
+}
+.bz-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.bz-close,
+.bz-newchat {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+}
+.bz-close {
+  font-size: 22px;
+}
+.bz-newchat {
+  font-size: 18px;
+  opacity: 0.9;
+}
+.bz-newchat:hover {
+  opacity: 1;
+}
+
+.bz-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  background: #f7f8fa;
+}
+
+.bz-msg {
+  margin-bottom: 10px;
+  display: flex;
+}
+.bz-msg-user {
+  justify-content: flex-end;
+}
+.bz-bubble {
+  max-width: 82%;
+  padding: 9px 12px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.bz-msg-bot .bz-bubble {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-bottom-left-radius: 4px;
+}
+.bz-msg-user .bz-bubble {
+  background: var(--bz-accent, #2563eb);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.bz-sources {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.bz-typing {
+  display: inline-flex;
+  gap: 3px;
+  padding: 10px 12px;
+}
+.bz-typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9ca3af;
+  animation: bz-bounce 1.2s infinite ease-in-out;
+}
+.bz-typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.bz-typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes bz-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+.bz-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 10px;
+  background: #fff;
+}
+.bz-input-row {
+  display: flex;
+  gap: 8px;
+}
+.bz-input {
+  flex: 1;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  padding: 9px 14px;
+  font-size: 14px;
+  outline: none;
+  resize: none;
+  max-height: 80px;
+  font-family: inherit;
+}
+.bz-input:focus {
+  border-color: var(--bz-accent, #2563eb);
+}
+.bz-send {
+  background: var(--bz-accent, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.bz-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bz-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+}
+.bz-human-btn {
+  background: none;
+  border: none;
+  color: var(--bz-accent, #2563eb);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.bz-escalated-note {
+  text-align: center;
+  font-size: 12px;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin-bottom: 10px;
+}

@@ -1,0 +1,46 @@
+SGEN Computer Academy — Frequently Asked Questions
+==================================================
+
+Q: Where is the academy located?
+A: We are at 2nd Floor, Tech Plaza, MG Road, Bengaluru 560001. The centre is a
+   short walk from the nearest metro station.
+
+Q: What are your working hours?
+A: The front desk is open Monday to Saturday, 9:00 AM to 7:00 PM. We are closed
+   on Sundays and public holidays, though some weekend batches run on Sundays.
+
+Q: Do I need prior programming experience to join?
+A: Not for the Python Programming course — it starts from the basics. Java
+   Development benefits from some prior programming familiarity. Full Stack
+   Development and Data Analytics are suitable for freshers who are willing to
+   put in practice time.
+
+Q: Are classes online or in a classroom?
+A: It depends on the course. Python and Java are classroom (offline), Data
+   Analytics is online, and Full Stack Development is hybrid (a mix of both).
+   Confirm the current mode with a counsellor at enquiry time.
+
+Q: Will I get a certificate?
+A: Yes. A completion certificate is awarded on attending at least 80% of
+   classes and completing the final project or assessment.
+
+Q: Do you help with placements?
+A: We offer placement assistance including resume guidance, mock interviews,
+   and sharing of relevant openings from our hiring partners. We do not
+   guarantee a job, as outcomes depend on individual performance.
+
+Q: Can I pay the fee in instalments?
+A: Yes. Fees can be paid in two instalments. The first is due before the batch
+   starts and the second within 30 days of starting.
+
+Q: Is there a demo or trial class?
+A: Yes, we offer one free demo class for each course so you can decide before
+   registering. Ask a counsellor to arrange it.
+
+Q: What if I miss a class?
+A: Recordings or make-up sessions are available for most batches. Please inform
+   your instructor in advance where possible.
+
+Q: Do you provide study material?
+A: Yes, digital notes, practice exercises, and project templates are provided
+   as part of the course.

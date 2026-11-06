@@ -1,0 +1,53 @@
+:root {
+  --bz-primary: #2563eb;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.stat-card {
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.nav-tabs .nav-link {
+  color: #374151;
+}
+
+.transcript-msg {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 0.4rem;
+  max-width: 85%;
+}
+
+.transcript-user {
+  background: #e5edff;
+  margin-left: auto;
+}
+
+.transcript-assistant {
+  background: #f3f4f6;
+}
+
+.convo-item {
+  cursor: pointer;
+}
+
+.convo-item.active {
+  background: #e5edff;
+}

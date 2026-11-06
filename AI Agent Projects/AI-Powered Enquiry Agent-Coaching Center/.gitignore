@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Env & secrets
+.env
+*.env
+!.env.example
+
+# Databases
+*.db
+*.sqlite3
+
+# Vector store
+chroma_store/
+
+# Uploaded knowledge docs (keep sample seeds, ignore runtime uploads)
+knowledge_base/uploads/
+
+# Test / tooling
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Architecture / design doc (internal; not tracked in git)
+ARCHITECTURE.md

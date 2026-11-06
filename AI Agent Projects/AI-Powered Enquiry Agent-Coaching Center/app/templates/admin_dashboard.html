@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — BizAssist{% endblock %}
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <span class="navbar-brand fw-bold">BizAssist <span class="badge bg-primary">Admin</span></span>
+    <div class="d-flex align-items-center text-light">
+      <span class="small me-3 d-none d-sm-inline">{{ admin_email }}</span>
+      <button id="logoutBtn" class="btn btn-sm btn-outline-light">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid py-4">
+  <!-- Stat cards -->
+  <div class="row g-3 mb-4" id="statCards">
+    <div class="col-6 col-md"><div class="card stat-card"><div class="card-body">
+      <div class="stat-label">Total Enquiries</div><div class="stat-value" id="s-total">—</div>
+    </div></div></div>
+    <div class="col-6 col-md"><div class="card stat-card"><div class="card-body">
+      <div class="stat-label">New Leads</div><div class="stat-value text-primary" id="s-new">—</div>
+    </div></div></div>
+    <div class="col-6 col-md"><div class="card stat-card"><div class="card-body">
+      <div class="stat-label">Pending Follow-ups</div><div class="stat-value text-warning" id="s-follow">—</div>
+    </div></div></div>
+    <div class="col-6 col-md"><div class="card stat-card"><div class="card-body">
+      <div class="stat-label">Open Escalations</div><div class="stat-value text-danger" id="s-esc">—</div>
+    </div></div></div>
+    <div class="col-6 col-md"><div class="card stat-card"><div class="card-body">
+      <div class="stat-label">Conversations</div><div class="stat-value" id="s-conv">—</div>
+    </div></div></div>
+  </div>
+
+  <ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-overview">Overview</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-leads">Leads</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-convos">Conversations</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-courses">Courses</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-docs">Documents</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-embed">Embed</button></li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- Overview -->
+    <div class="tab-pane fade show active" id="tab-overview">
+      <div class="card"><div class="card-body">
+        <h6 class="card-title">Course-wise Enquiries</h6>
+        <div id="courseWise" class="small text-muted">Loading…</div>
+      </div></div>
+    </div>
+
+    <!-- Leads -->
+    <div class="tab-pane fade" id="tab-leads">
+      <div class="card"><div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle">
+            <thead><tr>
+              <th>Name</th><th>Phone</th><th>Email</th><th>Course</th><th>Status</th><th>Created</th>
+            </tr></thead>
+            <tbody id="leadsBody"><tr><td colspan="6" class="text-muted">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Conversations -->
+    <div class="tab-pane fade" id="tab-convos">
+      <div class="row">
+        <div class="col-md-5">
+          <div class="card"><div class="card-body">
+            <h6 class="card-title">Recent Conversations</h6>
+            <div id="convoList" class="list-group list-group-flush small">Loading…</div>
+          </div></div>
+        </div>
+        <div class="col-md-7">
+          <div class="card"><div class="card-body">
+            <h6 class="card-title">Transcript</h6>
+            <div id="convoDetail" class="small text-muted">Select a conversation.</div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Courses -->
+    <div class="tab-pane fade" id="tab-courses">
+      <div class="card mb-3"><div class="card-body">
+        <h6 class="card-title">Add Course</h6>
+        <form id="courseForm" class="row g-2">
+          <div class="col-md-4"><input class="form-control form-control-sm" id="c-name" placeholder="Course name" required></div>
+          <div class="col-md-2"><input class="form-control form-control-sm" id="c-fee" type="number" min="0" placeholder="Fee" required></div>
+          <div class="col-md-2"><input class="form-control form-control-sm" id="c-duration" placeholder="Duration"></div>
+          <div class="col-md-2"><input class="form-control form-control-sm" id="c-mode" placeholder="Mode"></div>
+          <div class="col-md-2"><button class="btn btn-sm btn-primary w-100">Add</button></div>
+        </form>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead><tr><th>Name</th><th>Fee</th><th>Duration</th><th>Mode</th><th>Active</th><th></th></tr></thead>
+            <tbody id="coursesBody"><tr><td colspan="6" class="text-muted">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Documents -->
+    <div class="tab-pane fade" id="tab-docs">
+      <div class="card mb-3"><div class="card-body">
+        <h6 class="card-title">Upload Knowledge Document</h6>
+        <form id="docForm" class="row g-2 align-items-center">
+          <div class="col-md-5"><input class="form-control form-control-sm" type="file" id="d-file" accept=".pdf,.docx,.txt,.md" required></div>
+          <div class="col-md-4"><input class="form-control form-control-sm" id="d-title" placeholder="Title (optional)"></div>
+          <div class="col-md-3"><button class="btn btn-sm btn-primary w-100" id="d-btn">Upload &amp; Index</button></div>
+        </form>
+        <div id="docMsg" class="small mt-2"></div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <table class="table table-sm align-middle">
+          <thead><tr><th>Filename</th><th>Title</th><th>Status</th><th>Chunks</th><th></th></tr></thead>
+          <tbody id="docsBody"><tr><td colspan="5" class="text-muted">Loading…</td></tr></tbody>
+        </table>
+      </div></div>
+    </div>
+
+    <!-- Embed / Install -->
+    <div class="tab-pane fade" id="tab-embed">
+      <div class="card"><div class="card-body">
+        <h6 class="card-title">Embed the chat widget on your website</h6>
+        <p class="small text-muted">
+          Paste this single script tag into your website's HTML (just before
+          <code>&lt;/body&gt;</code>). The chat bubble will appear on every page.
+          Only your <strong>public</strong> institute key is used in the browser —
+          no admin password or model key is ever exposed.
+        </p>
+        <div class="position-relative">
+          <pre id="embedSnippet" class="bg-dark text-light p-3 rounded" style="font-size:.8rem; overflow:auto;">Loading…</pre>
+          <button id="copyEmbed" class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <div id="embedCopied" class="small text-success mt-1"></div>
+        <p class="small text-muted mb-0 mt-2">
+          Tip: set <code>data-api</code> to your BizAssist server's public URL
+          when embedding on an external site.
+        </p>
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

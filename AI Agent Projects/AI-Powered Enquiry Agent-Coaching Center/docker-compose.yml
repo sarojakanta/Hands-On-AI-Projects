@@ -1,0 +1,62 @@
+services:
+  bizassist:
+    build: .
+    container_name: bizassist
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: production
+      DEBUG: "false"
+
+      # --- Persistence (inside the named volume) ---
+      DATABASE_URL: "sqlite:////data/bizassist.db"
+      CHROMA_PERSIST_DIR: "/data/chroma_store"
+      KNOWLEDGE_BASE_DIR: "/data/knowledge_base"
+
+      # --- Security / networking ---
+      SECRET_KEY: "${SECRET_KEY:-change-me-in-production}"
+      CORS_ALLOW_ORIGINS: "${CORS_ALLOW_ORIGINS:-*}"
+      PUBLIC_CHAT_RATE_LIMIT: "${PUBLIC_CHAT_RATE_LIMIT:-20/minute}"
+
+      # --- LLM provider ---
+      # Default: mock (fully offline, zero cost, no external services needed
+      # in a container). Override LLM_PROVIDER + the relevant key to use a
+      # hosted model. To use a HOST Ollama from inside the container, set:
+      #   LLM_PROVIDER=ollama
+      #   OLLAMA_BASE_URL=http://host.docker.internal:11434/v1
+      LLM_PROVIDER: "${LLM_PROVIDER:-mock}"
+      USE_MOCK_LLM: "${USE_MOCK_LLM:-false}"
+      LLM_TEMPERATURE: "${LLM_TEMPERATURE:-0.2}"
+      EMBEDDING_PROVIDER: "${EMBEDDING_PROVIDER:-hashing}"
+
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_MODEL: "${OPENAI_MODEL:-gpt-4o-mini}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      ANTHROPIC_MODEL: "${ANTHROPIC_MODEL:-claude-sonnet-5-5}"
+      GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-llama3.1}"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
+
+      # --- RAG / chat size limits ---
+      RAG_CONTEXT_MAX_CHARS: "${RAG_CONTEXT_MAX_CHARS:-2400}"
+      MAX_CHAT_MESSAGE_CHARS: "${MAX_CHAT_MESSAGE_CHARS:-2000}"
+      CHAT_HISTORY_TURNS: "${CHAT_HISTORY_TURNS:-8}"
+    volumes:
+      # Persist the database, vector store and uploaded documents.
+      - bizassist_data:/data
+    # Lets the container reach a HOST-run Ollama via host.docker.internal
+    # (Docker Desktop provides this automatically; this maps it on Linux too).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    # Seed the KB dir inside the volume on first run, then seed DB + ingest.
+    command: >
+      sh -c "mkdir -p /data/knowledge_base &&
+             cp -rn /app/knowledge_base/* /data/knowledge_base/ 2>/dev/null || true &&
+             python -m scripts.seed &&
+             python -m scripts.ingest &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  bizassist_data:
