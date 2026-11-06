@@ -1,0 +1,29 @@
+---
+read_file_content:
+  description: Read the file at {file_path}. If {file_path} looks like a URL (starts
+    with http:// or https://), use the URL reading tool; otherwise use the file reading
+    tool. Return the full raw content of the file exactly as read.
+  expected_output: The full raw text content of the file.
+  agent: file_parser_record_extractor
+summarize_file:
+  description: "Using the file content from the previous step, write a clear and concise
+    summary in plain English. \n\nYour summary should:\n- Start with a one-sentence
+    overview of what the file is about\n- Highlight the key topics, sections, or categories
+    present\n- Call out the most important facts, figures, names, or dates\n- Be easy
+    to read — use short paragraphs or bullet points\n- Be no longer than necessary
+    — keep it concise and to the point\n\nDo NOT reproduce the raw data. Just summarize
+    what matters."
+  expected_output: A clear, concise, plain-English summary of the file content — covering
+    what it is, what it contains, and the most important highlights. Easy to read
+    in under 2 minutes.
+  agent: file_summarizer
+  context:
+  - read_file_content
+send_summary_email:
+  description: Using the summary from the previous step, send an email to {recipient_email}
+    with the subject "{email_subject}" and the summary as the email body. Format it
+    cleanly and professionally.
+  expected_output: Confirmation that the email was successfully sent to {recipient_email}.
+  agent: email_sender
+  context:
+  - summarize_file
