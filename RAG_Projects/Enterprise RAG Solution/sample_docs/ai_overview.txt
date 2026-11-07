@@ -1,0 +1,28 @@
+Artificial Intelligence Overview
+=================================
+
+Artificial Intelligence (AI) refers to the simulation of human intelligence in machines that are programmed to think and learn like humans. The term was coined by John McCarthy in 1956 at the Dartmouth Conference.
+
+Types of AI:
+- Narrow AI (Weak AI): Designed to perform a specific task, such as voice recognition or playing chess. Examples include Siri, Alexa, and chess-playing programs.
+- General AI (Strong AI): A theoretical form of AI that has human-level intelligence across a wide range of tasks. It does not yet exist.
+- Superintelligent AI: Hypothetical AI that surpasses human intelligence in all areas.
+
+Machine Learning:
+Machine Learning (ML) is a subset of AI that enables computers to learn from data without being explicitly programmed. Key types of ML include:
+1. Supervised Learning: The model is trained on labeled data.
+2. Unsupervised Learning: The model finds patterns in unlabeled data.
+3. Reinforcement Learning: The model learns by receiving rewards or penalties.
+
+Deep Learning:
+Deep Learning is a subset of machine learning that uses neural networks with many layers (deep neural networks). It has revolutionized fields like image recognition, natural language processing, and speech recognition.
+
+Applications of AI:
+- Healthcare: Disease diagnosis, drug discovery, personalized medicine.
+- Finance: Fraud detection, algorithmic trading, credit scoring.
+- Transportation: Autonomous vehicles, traffic optimization.
+- Education: Personalized learning, intelligent tutoring systems.
+- Entertainment: Recommendation systems (Netflix, Spotify), game AI.
+
+Ethical Concerns:
+AI raises significant ethical questions including bias in algorithms, job displacement, privacy violations, and the potential misuse of autonomous weapons. Researchers and policymakers are actively working on frameworks for responsible AI development.

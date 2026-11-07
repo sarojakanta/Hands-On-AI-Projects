@@ -1,0 +1,81 @@
+# Default:            docker compose up --build                (app only; use Groq/OpenAI/Claude keys from .env)
+# With local LLM:     docker compose --profile ollama up --build
+# With PostgreSQL:    docker compose --profile postgres up --build
+# Both profiles can be combined. Copy .env.example to .env first to set API keys and other options.
+services:
+  app:
+    build:
+      context: .
+      args:
+        WITH_POSTGRES: "1"
+    image: rag-knowledge-assistant:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Inside the container, Ollama is reached by service name (profile "ollama") or on the host machine.
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      TRUST_PROXY_HEADERS: ${TRUST_PROXY_HEADERS:-false}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - rag-data:/data
+    restart: unless-stopped
+
+  ollama:
+    profiles: ["ollama"]
+    image: ollama/ollama:latest
+    volumes:
+      - ollama-models:/root/.ollama
+    # After the first start:  docker compose exec ollama ollama pull llama3.1
+    restart: unless-stopped
+
+  postgres:
+    profiles: ["postgres"]
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env to use the postgres profile}
+      POSTGRES_DB: rag
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag -d rag"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # Same app, but storing metadata and vectors in PostgreSQL. Run only with --profile postgres
+  # (stop the default "app" service first: both publish port 8000).
+  app-postgres:
+    profiles: ["postgres"]
+    build:
+      context: .
+      args:
+        WITH_POSTGRES: "1"
+    image: rag-knowledge-assistant:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      DATABASE_URL: postgresql+psycopg://rag:${POSTGRES_PASSWORD}@postgres:5432/rag
+      VECTOR_STORE: pgvector
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - rag-data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  rag-data:
+  ollama-models:
+  pg-data:

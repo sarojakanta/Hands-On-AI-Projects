@@ -1,0 +1,25 @@
+# SIP Testing
+
+## SIP Registration
+
+A SIP endpoint should successfully register with
+the SIP server using valid credentials.
+
+The registration response should indicate
+successful registration.
+
+## Call Establishment
+
+A valid SIP call should generate the expected
+INVITE, provisional response, and final response.
+
+The calling party should receive the expected
+call-progress indication.
+
+## Call Failure
+
+If the destination is unavailable, the system
+should return the appropriate SIP failure response.
+
+The application should provide the appropriate
+user-facing failure indication.

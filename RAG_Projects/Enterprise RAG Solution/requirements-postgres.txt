@@ -1,0 +1,2 @@
+# Only needed when VECTOR_STORE=pgvector and/or DATABASE_URL points at PostgreSQL.
+psycopg[binary]>=3.2,<4

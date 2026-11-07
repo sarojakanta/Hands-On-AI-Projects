@@ -1,0 +1,22 @@
+# Golden questions for the documents in sample_docs/. One JSON object per line.
+{"id": "ai-definition", "question": "What is Artificial Intelligence?", "expected_sources": ["ai_overview.txt"], "expected_facts": ["simulation of human intelligence"]}
+{"id": "ai-mccarthy", "question": "Who coined the term AI and when?", "expected_sources": ["ai_overview.txt"], "expected_facts": ["John McCarthy", "1956"]}
+{"id": "ai-ml-types", "question": "What are the key types of machine learning?", "expected_sources": ["ai_overview.txt"], "expected_facts": ["Supervised Learning", "Reinforcement Learning"]}
+{"id": "climate-causes", "question": "What causes climate change?", "expected_sources": ["climate_change.txt"], "expected_facts": ["Greenhouse Gas Emissions"]}
+{"id": "climate-deforestation", "question": "Why does deforestation contribute to climate change?", "expected_sources": ["climate_change.txt"], "expected_facts": ["carbon sink"]}
+{"id": "python-creator", "question": "Who created Python and when was it first released?", "expected_sources": ["python_programming.txt"], "expected_facts": ["Guido van Rossum", "1991"]}
+{"id": "python-ml-libs", "question": "What Python libraries are used for machine learning?", "expected_sources": ["python_programming.txt"], "expected_facts": ["Scikit-learn"]}
+{"id": "space-first-human", "question": "Who was the first human in space?", "expected_sources": ["space_exploration.txt"], "expected_facts": ["Yuri Gagarin"]}
+{"id": "space-moon", "question": "Who was the first person to walk on the Moon?", "expected_sources": ["space_exploration.txt"], "expected_facts": ["Armstrong"]}
+{"id": "sip-register", "question": "What should happen when a SIP endpoint registers with valid credentials?", "expected_sources": ["sip_testing.txt"], "expected_facts": ["successfully register"]}
+{"id": "sip-failure", "question": "What should the system return when the SIP destination is unavailable?", "expected_sources": ["sip_testing.txt"], "expected_facts": ["SIP failure response"]}
+{"id": "ivr-invalid", "question": "What happens after three invalid DTMF inputs?", "expected_sources": ["ivr_testing.txt"], "expected_facts": ["fallback destination"]}
+{"id": "ivr-timeout", "question": "What should the IVR do when no DTMF input is received within the timeout?", "expected_sources": ["ivr_testing.txt"], "expected_facts": ["timeout"]}
+{"id": "teams-voicemail", "question": "What should happen when a Teams call is not answered and voicemail is configured?", "expected_sources": ["error reference.txt"], "expected_facts": ["routed to voicemail"]}
+{"id": "teams-transfer", "question": "Can a connected call be transferred to another destination?", "expected_sources": ["error reference.txt"], "expected_facts": ["transferable"]}
+{"id": "pl-2020", "question": "What was the profit or loss in 2020?", "expected_sources": ["profit_and_loss.txt"], "expected_facts": ["net loss of $2.8 million"]}
+{"id": "pl-loss-years", "question": "Which years had a net loss?", "expected_sources": ["profit_and_loss.txt"], "expected_facts": ["2018, 2020, and 2024"]}
+{"id": "pl-revenue-2023", "question": "What was the revenue in 2023?", "expected_sources": ["profit_and_loss.txt"], "expected_facts": ["$25.1 million"]}
+{"id": "off-capital", "question": "What is the capital of France?", "should_answer": false}
+{"id": "off-recipe", "question": "How do I bake sourdough bread?", "should_answer": false}
+{"id": "off-future-profit", "question": "What will the company profit be in 2030?", "should_answer": false}

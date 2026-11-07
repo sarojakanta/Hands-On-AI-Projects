@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>saroj RAG Demo — Ask Your Documents</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <a href="#chat-input" class="skip-link">Skip to the question box</a>
+
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🔍</span>
+        <span class="logo-text"><span class="logo-accent">saroj</span> <span class="logo-accent">RAG Demo</span></span>
+      </div>
+      <div class="header-right">
+        <label class="dev-toggle" title="Show retrieval details on each answer">
+          <input type="checkbox" id="dev-toggle" />
+          <span>Developer view</span>
+        </label>
+        <span class="header-subtitle">Retrieval-Augmented Generation</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <aside class="sidebar" aria-label="Conversations and settings">
+
+      <!-- Conversations -->
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">💬 Conversations</h2>
+          <button id="chat-new" class="small-btn primary" type="button">New</button>
+        </div>
+        <ul id="conversation-list" class="conv-list" aria-label="Past conversations"></ul>
+        <p id="conversation-empty" class="muted-note">No conversations yet. Ask a question to start one.</p>
+      </section>
+
+      <!-- Model -->
+      <section class="panel">
+        <h2 class="panel-title">⚙️ Model</h2>
+        <label for="model-provider" class="field-label">Provider</label>
+        <select id="model-provider" class="field"></select>
+        <label for="model-name" class="field-label">Model</label>
+        <input id="model-name" class="field" list="model-options" autocomplete="off" placeholder="model name" />
+        <datalist id="model-options"></datalist>
+        <div class="model-actions">
+          <button id="model-save" class="small-btn primary" type="button">Save</button>
+          <button id="model-test" class="small-btn" type="button">Test</button>
+        </div>
+        <div id="model-status" class="model-status" role="status" aria-live="polite"></div>
+      </section>
+
+      <!-- Documents -->
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">📄 Documents</h2>
+          <span id="doc-status" class="status-badge loading">Checking…</span>
+        </div>
+
+        <div class="doc-table-wrap">
+          <table class="doc-table" aria-label="Indexed documents">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Ver</th>
+                <th scope="col">Chunks</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="doc-rows"></tbody>
+          </table>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <h3 class="section-label">➕ Add a document</h3>
+        <p class="upload-hint">Pick a file, then index it. Supported: .txt, .md, .pdf, .docx, .csv (max 5 MB).</p>
+        <div class="upload-area">
+          <input type="file" id="file-input" accept=".txt,.md,.pdf,.docx,.csv" class="file-input" />
+          <label for="file-input" class="file-label" id="file-label">
+            <span class="file-icon">📂</span>
+            <span id="file-label-text">1. Select a file…</span>
+          </label>
+          <button id="upload-btn" class="upload-btn" disabled type="button">2. Upload &amp; index</button>
+          <div id="upload-progress" class="upload-progress" hidden>
+            <div id="upload-bar" class="upload-bar"></div>
+          </div>
+          <div id="upload-status" class="upload-status" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Chat -->
+    <section class="content">
+      <div class="panel chat-panel">
+        <div class="chat-head">
+          <h2 class="panel-title" id="chat-title">💬 Chat with your documents</h2>
+          <button id="chat-delete" class="small-btn danger" type="button" hidden>Delete conversation</button>
+        </div>
+
+        <div id="chat-log" class="chat-log" role="log" aria-live="polite" aria-label="Conversation">
+          <div id="chat-empty" class="chat-empty">
+            <p>Ask a question about your documents. Answers are grounded in the retrieved text and cite their sources; follow-up questions keep the context.</p>
+            <div class="suggestions" id="suggestions">
+              <button class="chip-btn" type="button" data-q="What was the profit or loss in 2020?">Profit or loss in 2020?</button>
+              <button class="chip-btn" type="button" data-q="Who was the first human in space?">First human in space?</button>
+              <button class="chip-btn" type="button" data-q="What causes climate change?">What causes climate change?</button>
+              <button class="chip-btn" type="button" data-q="What happens after three invalid DTMF inputs?">After three invalid DTMF inputs?</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="chat-status" class="chat-status" role="status" aria-live="polite"></div>
+
+        <form id="chat-form" class="chat-form">
+          <label for="chat-input" class="visually-hidden">Your question</label>
+          <input id="chat-input" class="query-input" type="text" autocomplete="off" maxlength="2000"
+                 placeholder="Ask a question about your documents…" />
+          <button id="chat-send" class="search-btn" type="submit"><span class="btn-text">Send</span><span class="btn-icon">→</span></button>
+          <button id="chat-stop" class="search-btn stop" type="button" hidden>Stop</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Built with FastAPI · ChromaDB · sentence-transformers (all-MiniLM-L6-v2)
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

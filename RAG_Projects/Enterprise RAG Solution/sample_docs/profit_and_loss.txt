@@ -1,0 +1,23 @@
+# Profit and Loss Report 2018-2024
+
+This report uses fictional sample data for a mid-sized company. All amounts are in US dollars.
+
+## Yearly Results
+
+In 2018, the company reported revenue of $12.0 million and expenses of $13.5 million, resulting in a net loss of $1.5 million. The 2018 loss was caused by heavy investment in new product development.
+
+In 2019, the company reported revenue of $15.2 million and expenses of $14.1 million, resulting in a net profit of $1.1 million. The 2019 profit came from strong sales of the new product line.
+
+In 2020, the company reported revenue of $11.8 million and expenses of $14.6 million, resulting in a net loss of $2.8 million. The 2020 loss was the largest in the period and was caused by pandemic-related disruption.
+
+In 2021, the company reported revenue of $16.4 million and expenses of $15.0 million, resulting in a net profit of $1.4 million. The 2021 profit reflected a recovery in customer demand and tighter cost control.
+
+In 2022, the company reported revenue of $21.3 million and expenses of $18.9 million, resulting in a net profit of $2.4 million. The 2022 profit was driven by expansion into two new markets.
+
+In 2023, the company reported revenue of $25.1 million and expenses of $22.6 million, resulting in a net profit of $2.5 million. The 2023 profit was the highest in the period and came with record annual revenue.
+
+In 2024, the company reported revenue of $24.0 million and expenses of $25.2 million, resulting in a net loss of $1.2 million. The 2024 loss was caused by higher hiring costs and lower sales.
+
+## Overall Summary
+
+The company made a net loss in 2018, 2020, and 2024. The company made a net profit in 2019, 2021, 2022, and 2023. The highest profit was $2.5 million in 2023 and the largest loss was $2.8 million in 2020.

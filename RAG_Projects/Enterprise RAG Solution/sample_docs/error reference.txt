@@ -1,0 +1,22 @@
+# Teams Calling Testing
+
+## Outbound Calling
+
+A provisioned Teams user should be able to make
+an outbound call when the user has the required
+calling configuration and phone number.
+
+The call should transition to a connected state
+when the destination answers.
+
+## Voicemail
+
+When the destination does not answer and voicemail
+is configured, the call should be routed to voicemail
+according to the applicable configuration.
+
+## Call Transfer
+
+A connected call should be transferable to another
+valid destination when the user has the required
+calling permissions.

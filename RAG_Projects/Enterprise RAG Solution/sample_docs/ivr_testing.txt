@@ -1,0 +1,30 @@
+# IVR Testing
+
+## Invalid DTMF
+
+If the caller enters an invalid DTMF option,
+the IVR should play the invalid-option prompt.
+
+The caller should be allowed to retry.
+
+After three consecutive invalid inputs,
+the IVR should route the caller to the configured
+fallback destination.
+
+## DTMF Timeout
+
+If no DTMF input is received within the configured
+timeout period, the IVR should play the timeout
+prompt.
+
+The caller should then be given the configured
+retry option.
+
+## Valid DTMF
+
+When the caller enters a valid DTMF option,
+the IVR should route the call to the destination
+configured for that option.
+
+The system should play the appropriate prompt
+before transferring the call.
