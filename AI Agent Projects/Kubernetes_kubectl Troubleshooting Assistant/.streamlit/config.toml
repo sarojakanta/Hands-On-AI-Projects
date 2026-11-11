@@ -1,0 +1,9 @@
+[browser]
+gatherUsageStats = false
+
+[server]
+headless = true
+
+[theme]
+# Light grey drives the primary Investigate button (instead of default red).
+primaryColor = "#e0e0e0"
