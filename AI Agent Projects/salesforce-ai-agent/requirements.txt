@@ -1,0 +1,10 @@
+# Core
+python-dotenv>=1.0.1
+Flask>=3.0.0
+openai>=1.40.0
+
+# MCP (local + remote modes)
+fastmcp>=2.0.0
+
+# Salesforce REST API (remote MCP mode — replaces sf CLI dependency)
+simple-salesforce>=1.12.0

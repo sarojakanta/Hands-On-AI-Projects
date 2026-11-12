@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saroj Saroj Gen AI  SF Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+<div class="app-shell" id="appShell">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Saroj Saroj Gen AI  SF Agent</span>
+          <span class="brand-sub">Gen AI for Salesforce</span>
+        </div>
+      </div>
+      <button class="icon-btn" id="sidebarToggle" aria-label="Collapse sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+
+    <!-- Health -->
+    <div class="health-row" id="healthBar">
+      <div class="health-item" id="hSfCli"><span class="hdot"></span>SF CLI</div>
+      <div class="health-item" id="hSfOrg"><span class="hdot"></span>Org</div>
+      <div class="health-item" id="hOpenAI"><span class="hdot"></span>AI</div>
+    </div>
+
+    <!-- Nav tabs -->
+    <nav class="side-nav">
+      <button class="nav-btn active" data-view="chat" id="navChat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Ask AI
+      </button>
+      <button class="nav-btn" data-view="dashboard" id="navDash">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+    </nav>
+
+    <div class="sidebar-section-label">Quick Queries</div>
+    <div class="suggestions-list" id="suggestionsList">
+      <div class="skel-wrap"><div class="skel"></div><div class="skel short"></div><div class="skel"></div><div class="skel short"></div></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="ghost-btn sm" id="clearHistoryBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+        Clear chat
+      </button>
+      <div class="mode-pill" id="modePill"><span class="mode-dot"></span><span id="modeLabel">…</span></div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main-area">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="icon-btn" id="sidebarOpenBtn" aria-label="Open sidebar" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-title">
+        <h1 id="viewTitle">Ask your Salesforce data</h1>
+        <p id="viewSub">Natural language · Real-time · Agentic</p>
+      </div>
+      <div class="topbar-right">
+        <button class="ghost-btn sm" id="refreshDashBtn" style="display:none" title="Refresh dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+        <div class="live-pill" id="livePill"><span class="live-dot"></span>Live</div>
+      </div>
+    </header>
+
+    <!-- ── VIEW: CHAT ── -->
+    <div class="view" id="viewChat">
+      <div class="chat-layout">
+
+        <!-- ── CENTER: chat thread + input ── -->
+        <div class="chat-center">
+          <div class="chat-thread" id="chatThread">
+            <div class="welcome" id="welcomeState">
+              <div class="welcome-icon">
+                <svg viewBox="0 0 56 56" fill="none">
+                  <circle cx="28" cy="28" r="28" fill="url(#wg)"/>
+                  <path d="M20 28c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="28" cy="28" r="2.5" fill="white"/>
+                  <path d="M28 20v-4M28 40v-4M20 28h-4M40 28h-4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                  <defs><linearGradient id="wg" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#0176d3"/><stop offset="1" stop-color="#032d60"/></linearGradient></defs>
+                </svg>
+              </div>
+              <h2>What would you like to know?</h2>
+              <p>I can query any Salesforce object, apply filters, run analytics, and explain results — all in plain English.</p>
+              <div class="chip-row" id="welcomeChips"></div>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="input-area">
+            <div class="input-box" id="inputBox">
+              <textarea id="promptInput" rows="1" placeholder="Ask about your Salesforce data…" autocomplete="off"></textarea>
+              <div class="input-end">
+                <span class="input-hint" id="inputHint"></span>
+                <button class="send-btn" id="sendBtn" disabled aria-label="Send">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="input-foot">
+              <span><kbd>Enter</kbd> send &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> newline</span>
+              <span id="charCount"></span>
+            </div>
+          </div>
+        </div><!-- /chat-center -->
+
+        <!-- ── RIGHT PANEL ── -->
+        <aside class="chat-right">
+
+          <!-- Last Query (SOQL inspector) -->
+          <div class="right-section" id="inspectorSection">
+            <div class="right-section-hd">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              Last Query
+            </div>
+            <div id="soqlPlaceholder" class="right-empty">Run a query to see the SOQL here.</div>
+            <div id="inspectorPanel" hidden>
+              <pre class="soql-pre" id="soqlCode"></pre>
+              <button class="ghost-btn xs" id="copySOQL" style="margin-top:8px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Snapshot (dark KPI gauges) -->
+          <div class="right-section" id="miniKpiSection">
+            <div class="right-section-hd">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+              Live Snapshot
+            </div>
+            <div id="miniKpiBody"><div class="right-empty">Loading…</div></div>
+          </div>
+
+          <!-- Context tips -->
+          <div class="right-section">
+            <div class="right-section-hd">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>
+              Tips
+            </div>
+            <ul class="tips-list">
+              <li>Ask follow-up questions — context is remembered.</li>
+              <li>Say "filter by high priority" to refine results.</li>
+              <li>Ask "summarise this" after any result.</li>
+              <li>Open the Dashboard tab for visual metrics.</li>
+            </ul>
+          </div>
+
+        </aside><!-- /chat-right -->
+
+      </div><!-- /chat-layout -->
+    </div><!-- /viewChat -->
+
+    <!-- ── VIEW: DASHBOARD ── -->
+    <div class="view" id="viewDashboard" hidden>
+      <div class="dash-scroll">
+
+        <!-- KPI row -->
+        <div class="kpi-row" id="kpiRow">
+          <div class="kpi-card" id="kpiCases">
+            <div class="kpi-icon kpi-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.08 4.18 2 2 0 015.07 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+            <div class="kpi-body"><div class="kpi-val" id="kpiCasesVal">—</div><div class="kpi-lbl">Open Cases</div></div>
+          </div>
+          <div class="kpi-card" id="kpiHigh">
+            <div class="kpi-icon kpi-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="kpi-body"><div class="kpi-val" id="kpiHighVal">—</div><div class="kpi-lbl">High Priority</div></div>
+          </div>
+          <div class="kpi-card" id="kpiPipeline">
+            <div class="kpi-icon kpi-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+            <div class="kpi-body"><div class="kpi-val" id="kpiPipelineVal">—</div><div class="kpi-lbl">Pipeline Value</div></div>
+          </div>
+          <div class="kpi-card" id="kpiLeads">
+            <div class="kpi-icon kpi-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+            <div class="kpi-body"><div class="kpi-val" id="kpiLeadsVal">—</div><div class="kpi-lbl">Open Leads</div></div>
+          </div>
+        </div>
+
+        <!-- Main grid -->
+        <div class="dash-grid">
+
+          <!-- Recent open cases table -->
+          <div class="dash-card span-2" id="cardRecentCases">
+            <div class="card-hd">
+              <span class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Open Cases
+              </span>
+              <button class="ghost-btn xs ask-btn" data-prompt="Show me all open high-priority cases">Ask AI →</button>
+            </div>
+            <div class="card-body" id="recentCasesBody">
+              <div class="dash-loading">Loading…</div>
+            </div>
+          </div>
+
+          <!-- Pipeline by stage -->
+          <div class="dash-card" id="cardPipeline">
+            <div class="card-hd">
+              <span class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Pipeline by Stage
+              </span>
+              <button class="ghost-btn xs ask-btn" data-prompt="What is the total pipeline value by stage?">Ask AI →</button>
+            </div>
+            <div class="card-body" id="pipelineBody">
+              <div class="dash-loading">Loading…</div>
+            </div>
+          </div>
+
+          <!-- Cases by priority -->
+          <div class="dash-card" id="cardPriority">
+            <div class="card-hd">
+              <span class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Cases by Priority
+              </span>
+            </div>
+            <div class="card-body" id="priorityBody">
+              <div class="dash-loading">Loading…</div>
+            </div>
+          </div>
+
+          <!-- AI Recommendations -->
+          <div class="dash-card span-2" id="cardRecs">
+            <div class="card-hd">
+              <span class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                AI Recommendations
+              </span>
+              <button class="ghost-btn xs" id="shareRecsBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share
+              </button>
+            </div>
+            <div class="card-body" id="recsBody">
+              <div class="dash-loading">Loading…</div>
+            </div>
+          </div>
+
+          <!-- Accounts by industry -->
+          <div class="dash-card" id="cardAccounts">
+            <div class="card-hd">
+              <span class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Accounts by Industry
+              </span>
+              <button class="ghost-btn xs ask-btn" data-prompt="List all accounts in the Technology industry">Ask AI →</button>
+            </div>
+            <div class="card-body" id="accountsBody">
+              <div class="dash-loading">Loading…</div>
+            </div>
+          </div>
+
+          <!-- Leads by status -->
+          <div class="dash-card" id="cardLeads">
+            <div class="card-hd">
+              <span class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Leads by Status
+              </span>
+              <button class="ghost-btn xs ask-btn" data-prompt="List new leads from the Technology industry">Ask AI →</button>
+            </div>
+            <div class="card-body" id="leadsBody">
+              <div class="dash-loading">Loading…</div>
+            </div>
+          </div>
+
+        </div><!-- /dash-grid -->
+      </div><!-- /dash-scroll -->
+    </div><!-- /viewDashboard -->
+
+  </main>
+</div><!-- /app-shell -->
+
+<!-- Share modal -->
+<div class="modal-overlay" id="shareModal" hidden>
+  <div class="modal">
+    <div class="modal-hd">
+      <span class="modal-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share Results
+      </span>
+      <button class="icon-btn" id="closeModal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-sub">Copy this summary to share via Slack, email, or any tool.</p>
+      <textarea class="share-text" id="shareText" readonly rows="14"></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="ghost-btn sm" id="closeModal2">Cancel</button>
+      <button class="primary-btn" id="copyShareText">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy to clipboard
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- ═══════════════════════════════ JS ═══════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─── state ─────────────────────────────────────────────────── */
+const S = {
+  sessionId:   'sess_' + Math.random().toString(36).slice(2,10),
+  lastPrompt:  '',
+  lastAnswer:  '',
+  lastSOQL:    '',
+  lastRecords: [],
+  lastObject:  '',
+  dashData:    null,
+  streaming:   false,
+  view:        'chat',
+};
+
+/* ─── refs ──────────────────────────────────────────────────── */
+const $  = id => document.getElementById(id);
+const ct = $('chatThread');
+
+/* ─── view switching ────────────────────────────────────────── */
+function showEl(el)  { el.removeAttribute('hidden'); }
+function hideEl(el)  { el.setAttribute('hidden', ''); }
+
+function switchView(v) {
+  S.view = v;
+  if (v === 'chat') { showEl($('viewChat')); hideEl($('viewDashboard')); }
+  else              { hideEl($('viewChat')); showEl($('viewDashboard')); }
+  $('navChat').classList.toggle('active', v === 'chat');
+  $('navDash').classList.toggle('active', v === 'dashboard');
+  $('viewTitle').textContent = v === 'chat' ? 'Ask your Salesforce data' : 'CRM Dashboard';
+  $('viewSub').textContent   = v === 'chat' ? 'Natural language · Real-time · Agentic' : 'Live metrics from your org';
+  $('refreshDashBtn').style.display = v === 'dashboard' ? '' : 'none';
+  if (v === 'dashboard' && !S.dashData) loadDashboard();
+}
+
+document.querySelectorAll('.nav-btn').forEach(b =>
+  b.addEventListener('click', () => switchView(b.dataset.view))
+);
+$('refreshDashBtn').addEventListener('click', () => { S.dashData = null; loadDashboard(); });
+
+/* ─── sidebar ───────────────────────────────────────────────── */
+$('sidebarToggle').addEventListener('click',  () => toggleSidebar(false));
+$('sidebarOpenBtn').addEventListener('click', () => toggleSidebar(true));
+function toggleSidebar(open) {
+  const collapsed = $('appShell').classList.toggle('sidebar-collapsed', !open);
+  $('sidebarOpenBtn').style.display = collapsed ? '' : 'none';
+}
+
+/* ─── health ────────────────────────────────────────────────── */
+async function checkHealth() {
+  try {
+    const d = await fetch('/api/health').then(r => r.json());
+    dot('hSfCli',  d.sf_cli);
+    dot('hSfOrg',  d.sf_username);
+    dot('hOpenAI', d.openai_key);
+    $('modeLabel').textContent = d.openai_key ? 'LLM Mode' : 'Fallback';
+    $('modePill').classList.toggle('mode-on', !!d.openai_key);
+    $('livePill').classList.toggle('live-ok', d.status === 'ok');
+  } catch { ['hSfCli','hSfOrg','hOpenAI'].forEach(id => dot(id,false)); }
+}
+function dot(id, ok) {
+  const el = $(id); if (!el) return;
+  el.querySelector('.hdot').className = 'hdot ' + (ok ? 'ok' : 'err');
+}
+
+/* ─── suggestions ───────────────────────────────────────────── */
+async function loadSuggestions() {
+  try {
+    const cats = await fetch('/api/suggestions').then(r => r.json());
+    $('suggestionsList').innerHTML = '';
+    // welcome chips
+    const all = cats.flatMap(c => c.prompts);
+    $('welcomeChips').innerHTML = shuffle(all).slice(0,4)
+      .map(p => `<button class="chip" data-p="${esc(p)}">${esc(p)}</button>`).join('');
+    $('welcomeChips').querySelectorAll('.chip').forEach(b =>
+      b.addEventListener('click', () => send(b.dataset.p)));
+    // sidebar
+    cats.forEach(cat => {
+      const sec = document.createElement('div');
+      sec.className = 'sug-sec';
+      sec.innerHTML = `
+        <button class="sug-cat" aria-expanded="false">
+          <span>${cat.icon} ${esc(cat.category)}</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="sug-items" hidden>${cat.prompts.map(p =>
+          `<button class="sug-item" data-p="${esc(p)}">${esc(p)}</button>`).join('')}
+        </div>`;
+      $('suggestionsList').appendChild(sec);
+      const catBtn = sec.querySelector('.sug-cat');
+      const items  = sec.querySelector('.sug-items');
+      catBtn.addEventListener('click', () => {
+        const open = catBtn.getAttribute('aria-expanded') === 'true';
+        catBtn.setAttribute('aria-expanded', String(!open));
+        items.hidden = open;
+      });
+      items.querySelectorAll('.sug-item').forEach(b =>
+        b.addEventListener('click', () => send(b.dataset.p)));
+    });
+  } catch { $('suggestionsList').innerHTML = '<p class="sug-err">Could not load.</p>'; }
+}
+
+/* ─── input ─────────────────────────────────────────────────── */
+const inp = $('promptInput');
+inp.addEventListener('input', () => {
+  inp.style.height = 'auto';
+  inp.style.height = Math.min(inp.scrollHeight, 180) + 'px';
+  const n = inp.value.trim().length;
+  $('sendBtn').disabled = n === 0 || S.streaming;
+  $('charCount').textContent = n > 0 ? n : '';
+});
+inp.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!$('sendBtn').disabled) send(inp.value.trim()); }
+});
+$('sendBtn').addEventListener('click', () => { const t = inp.value.trim(); if (t) send(t); });
+$('clearHistoryBtn').addEventListener('click', async () => {
+  await fetch('/api/history', { method: 'DELETE', headers: {'X-Session-Id': S.sessionId} });
+  ct.querySelectorAll('.msg-row').forEach(e => e.remove());
+  $('welcomeState').hidden = false;
+  hideInspector();
+  toast('History cleared', 'info');
+});
+
+/* ─── send + stream ─────────────────────────────────────────── */
+function send(text) {
+  if (S.streaming || !text.trim()) return;
+  // switch to chat view
+  if (S.view !== 'chat') switchView('chat');
+  S.lastPrompt = text;
+  inp.value = ''; inp.style.height = 'auto';
+  $('sendBtn').disabled = true;
+  $('welcomeState').hidden = true;
+  addUserMsg(text);
+  streamResp(text);
+}
+
+async function streamResp(prompt) {
+  S.streaming = true;
+  setInput(false);
+  const row    = addAIMsg('', true);
+  const bubble = row.querySelector('.bubble-content');
+  const tbar   = row.querySelector('.tbar');
+  let full = '';
+
+  const es = new EventSource(`/api/stream?prompt=${encodeURIComponent(prompt)}&session_id=${S.sessionId}`);
+
+  es.onmessage = e => {
+    let ev; try { ev = JSON.parse(e.data); } catch { return; }
+    switch (ev.type) {
+      case 'tool_start':
+        addToolBadge(tbar, ev.tool, 'run');
+        $('inputHint').textContent = 'Running ' + fmtTool(ev.tool) + '…';
+        break;
+      case 'tool_end':
+        finishToolBadge(tbar, ev.tool, ev.summary);
+        break;
+      case 'text_chunk':
+        full += ev.text;
+        bubble.innerHTML = md(full) + '<span class="cursor"></span>';
+        scrollEnd();
+        break;
+      case 'done':
+        es.close(); S.streaming = false; setInput(true); $('inputHint').textContent = '';
+        bubble.innerHTML = md(full || 'Done.');
+        row.querySelector('.msg-time').textContent = now();
+        row.classList.remove('streaming');
+        S.lastAnswer  = full;
+        S.lastSOQL    = ev.soql    || '';
+        S.lastRecords = ev.records || [];
+        S.lastObject  = ev.object  || '';
+        if (ev.soql) showInspector(ev.soql);   // right-side panel only
+        // Always render records table
+        if (ev.records && ev.records.length) renderRecordTable(ev.records, ev.object, row);
+        // Share button on every AI response
+        addShareBtn(row);
+        scrollEnd();
+        break;
+      case 'error':
+        es.close(); S.streaming = false; setInput(true); $('inputHint').textContent = '';
+        bubble.innerHTML = `<span class="err-txt">⚠ ${esc(ev.message)}</span>`;
+        row.classList.remove('streaming');
+        toast(ev.message, 'error');
+        break;
+    }
+  };
+  es.onerror = () => {
+    if (!S.streaming) return;
+    es.close(); S.streaming = false; setInput(true);
+    bubble.innerHTML += '<br><span class="err-txt">⚠ Connection lost.</span>';
+    row.classList.remove('streaming');
+  };
+}
+
+/* ─── message builders ──────────────────────────────────────── */
+function addUserMsg(text) {
+  const r = document.createElement('div');
+  r.className = 'msg-row msg-user';
+  r.innerHTML = `<div class="avatar av-u">You</div>
+    <div class="mbody"><div class="bubble bu">${esc(text)}</div>
+    <div class="mmeta"><span class="msg-time">${now()}</span></div></div>`;
+  ct.appendChild(r); scrollEnd(); return r;
+}
+function addAIMsg(text, streaming=false) {
+  const r = document.createElement('div');
+  r.className = 'msg-row msg-ai' + (streaming?' streaming':'');
+  r.innerHTML = `
+    <div class="avatar av-ai">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2a7 7 0 017 7c0 2.4-1.2 4.5-3 5.7V17a1 1 0 01-1 1H9a1 1 0 01-1-1v-2.3A7 7 0 0112 2z"/>
+        <path d="M9 21h6M12 17v4"/>
+      </svg>
+    </div>
+    <div class="mbody">
+      <div class="tbar"></div>
+      <div class="bubble ba"><div class="bubble-content">${
+        streaming
+          ? '<span class="typing"><span></span><span></span><span></span></span>'
+          : md(text)
+      }</div></div>
+      <div class="mmeta"><span class="msg-time">${streaming?'':now()}</span></div>
+    </div>`;
+  ct.appendChild(r); scrollEnd(); return r;
+}
+
+/* ─── records table (always rendered) ──────────────────────── */
+function renderRecordTable(records, objName, parentRow) {
+  if (!records.length) return;
+  const skip = new Set(['attributes']);
+  const keys = Object.keys(records[0]).filter(k => !skip.has(k)).slice(0, 8);
+
+  let html = `<div class="rt-wrap">
+    <div class="rt-header">
+      <span class="rt-label">📋 ${records.length} ${objName || 'record'}${records.length!==1?'s':''}</span>
+    </div>
+    <div class="rt-scroll"><table class="rt">
+      <thead><tr>${keys.map(k=>`<th>${esc(fmtKey(k))}</th>`).join('')}</tr></thead>
+      <tbody>`;
+  records.forEach(rec => {
+    html += '<tr>' + keys.map(k => {
+      const v = rec[k];
+      let cell = '—';
+      if (v === null || v === undefined) cell = '—';
+      else if (typeof v === 'object') cell = v.Name || v.name || JSON.stringify(v);
+      else cell = String(v);
+      // Badges for status/priority
+      const badgeClass = statusBadge(k, cell);
+      return `<td>${badgeClass ? `<span class="badge ${badgeClass}">${esc(cell)}</span>` : esc(cell)}</td>`;
+    }).join('') + '</tr>';
+  });
+  html += `</tbody></table></div></div>`;
+
+  const wrap = document.createElement('div');
+  wrap.innerHTML = html;
+  parentRow.querySelector('.mbody').appendChild(wrap.firstElementChild);
+}
+
+function fmtKey(k) {
+  return k.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase()).trim();
+}
+function statusBadge(key, val) {
+  const k = key.toLowerCase(); const v = (val||'').toLowerCase();
+  if (k === 'priority') return v==='high'?'badge-red':v==='medium'?'badge-amber':'badge-gray';
+  if (k === 'status') {
+    if (['closed','won','converted'].some(s=>v.includes(s))) return 'badge-green';
+    if (['escalated','high'].some(s=>v.includes(s))) return 'badge-red';
+    return 'badge-blue';
+  }
+  if (k === 'stagename') {
+    if (v.includes('won')) return 'badge-green';
+    if (v.includes('lost')) return 'badge-red';
+    return 'badge-blue';
+  }
+  return '';
+}
+
+/* ─── tool badges ───────────────────────────────────────────── */
+function addToolBadge(bar, tool, state) {
+  const d = document.createElement('div');
+  d.className = `tbadge tbadge-${state}`; d.dataset.tool = tool;
+  d.innerHTML = `<span class="tspin"></span><span>${fmtTool(tool)}</span>`;
+  bar.appendChild(d); bar.hidden = false;
+}
+function finishToolBadge(bar, tool, summary) {
+  const d = bar.querySelector(`[data-tool="${tool}"]`); if (!d) return;
+  d.className = 'tbadge tbadge-done';
+  d.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10"><polyline points="20 6 9 17 4 12"/></svg>
+    <span>${fmtTool(tool)}</span>${summary?`<span class="tsumm">${esc(summary)}</span>`:''}`;
+}
+
+/* ─── SOQL inspector (right-side panel only) ────────────────── */
+function showInspector(soql) {
+  $('soqlCode').textContent = soql;
+  hideEl($('soqlPlaceholder'));
+  showEl($('inspectorPanel'));
+}
+function hideInspector() {
+  showEl($('soqlPlaceholder'));
+  hideEl($('inspectorPanel'));
+}
+$('copySOQL').addEventListener('click', () =>
+  navigator.clipboard.writeText($('soqlCode').textContent).then(() => toast('SOQL copied!', 'success')));
+
+/* ─── share button on chat messages ────────────────────────── */
+function addShareBtn(row) {
+  const b = document.createElement('button');
+  b.className = 'ghost-btn xs'; b.style.marginLeft='4px';
+  b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share`;
+  b.addEventListener('click', () => openShareModal(S.lastPrompt, S.lastAnswer, S.lastSOQL, S.lastRecords, S.lastObject));
+  row.querySelector('.mmeta').appendChild(b);
+}
+
+/* ─── share modal ───────────────────────────────────────────── */
+async function openShareModal(prompt, answer, soql, records, obj) {
+  const modal = $('shareModal');
+  $('shareText').value = 'Generating…';
+  modal.hidden = false;
+  try {
+    const res = await fetch('/api/share', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt, answer, soql, records, object: obj }),
+    });
+    const data = await res.json();
+    $('shareText').value = data.text || 'No content.';
+  } catch { $('shareText').value = `Query: ${prompt}\n\n${answer}`; }
+}
+
+$('closeModal').addEventListener('click',  () => $('shareModal').hidden = true);
+$('closeModal2').addEventListener('click', () => $('shareModal').hidden = true);
+$('shareModal').addEventListener('click', e => { if (e.target === $('shareModal')) $('shareModal').hidden = true; });
+$('copyShareText').addEventListener('click', () => {
+  navigator.clipboard.writeText($('shareText').value).then(() => toast('Copied to clipboard!','success'));
+});
+
+/* ─── dashboard ─────────────────────────────────────────────── */
+async function loadDashboard() {
+  // Show loading state
+  ['recentCasesBody','pipelineBody','priorityBody','recsBody','accountsBody','leadsBody']
+    .forEach(id => { $(id).innerHTML = '<div class="dash-loading">Loading…</div>'; });
+
+  try {
+    const d = await fetch('/api/dashboard').then(r => r.json());
+    S.dashData = d;
+
+    // KPI cards
+    $('kpiCasesVal').textContent    = d.cases?.open_total ?? '—';
+    $('kpiHighVal').textContent     = d.cases?.by_priority?.High ?? '—';
+    $('kpiPipelineVal').textContent = d.pipeline?.total_value
+      ? '$' + fmtAmount(d.pipeline.total_value) : '—';
+    $('kpiLeadsVal').textContent    = d.leads?.total ?? '—';
+
+    // highlight high priority
+    if ((d.cases?.by_priority?.High || 0) > 0)
+      $('kpiHigh').classList.add('kpi-alert');
+
+    // Recent cases table
+    renderDashTable(
+      'recentCasesBody',
+      d.recent_cases || [],
+      ['CaseNumber','Subject','Status','Priority','Account'],
+      rec => ({
+        CaseNumber: rec.CaseNumber,
+        Subject:    rec.Subject,
+        Status:     rec.Status,
+        Priority:   rec.Priority,
+        Account:    (rec.Account||{}).Name || '—',
+      })
+    );
+
+    // Pipeline
+    const pipe = d.pipeline?.by_stage || [];
+    if (pipe.length) {
+      const maxAmt = Math.max(...pipe.map(s=>s.amount||0)) || 1;
+      $('pipelineBody').innerHTML = pipe.map(s => `
+        <div class="bar-row">
+          <span class="bar-lbl">${esc(s.stage)}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(s.amount/maxAmt*100)}%"></div></div>
+          <span class="bar-val">$${fmtAmount(s.amount)} <span class="bar-cnt">(${s.count})</span></span>
+        </div>`).join('');
+    } else {
+      $('pipelineBody').innerHTML = '<p class="empty-msg">No open opportunities found.</p>';
+    }
+
+    // Priority donut-style bars
+    const pri = d.cases?.by_priority || {};
+    const priTotal = (pri.High||0) + (pri.Medium||0) + (pri.Low||0) || 1;
+    $('priorityBody').innerHTML = [
+      {lbl:'High',   val:pri.High||0,   cls:'bar-red'},
+      {lbl:'Medium', val:pri.Medium||0, cls:'bar-amber'},
+      {lbl:'Low',    val:pri.Low||0,    cls:'bar-gray'},
+    ].map(p=>`
+      <div class="bar-row">
+        <span class="bar-lbl">${p.lbl}</span>
+        <div class="bar-track"><div class="bar-fill ${p.cls}" style="width:${Math.round(p.val/priTotal*100)}%"></div></div>
+        <span class="bar-val">${p.val}</span>
+      </div>`).join('');
+
+    // Accounts
+    const accts = d.accounts?.by_industry || [];
+    const maxAcct = Math.max(...accts.map(a=>a.count||0)) || 1;
+    $('accountsBody').innerHTML = accts.length
+      ? `<p class="dash-sub">Total: ${d.accounts?.total || 0}</p>` +
+        accts.map(a=>`
+          <div class="bar-row">
+            <span class="bar-lbl">${esc(a.industry)}</span>
+            <div class="bar-track"><div class="bar-fill bar-blue" style="width:${Math.round(a.count/maxAcct*100)}%"></div></div>
+            <span class="bar-val">${a.count}</span>
+          </div>`).join('')
+      : '<p class="empty-msg">No account data.</p>';
+
+    // Leads
+    const leads = d.leads?.by_status || [];
+    const maxLead = Math.max(...leads.map(l=>l.count||0)) || 1;
+    $('leadsBody').innerHTML = leads.length
+      ? leads.map(l=>`
+          <div class="bar-row">
+            <span class="bar-lbl">${esc(l.status)}</span>
+            <div class="bar-track"><div class="bar-fill bar-green" style="width:${Math.round(l.count/maxLead*100)}%"></div></div>
+            <span class="bar-val">${l.count}</span>
+          </div>`).join('')
+      : '<p class="empty-msg">No lead data.</p>';
+
+    // Recommendations
+    renderRecs(d.recommendations || []);
+
+  } catch(e) {
+    ['recentCasesBody','pipelineBody','priorityBody','recsBody','accountsBody','leadsBody']
+      .forEach(id => { $(id).innerHTML = `<p class="empty-msg err-txt">Failed to load: ${esc(e.message)}</p>`; });
+  }
+}
+
+function renderDashTable(containerId, records, cols, mapper) {
+  const el = $(containerId);
+  if (!records.length) { el.innerHTML = '<p class="empty-msg">No records found.</p>'; return; }
+  const rows = records.map(mapper);
+  el.innerHTML = `<div class="rt-scroll"><table class="rt">
+    <thead><tr>${cols.map(c=>`<th>${esc(fmtKey(c))}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${cols.map(c=>{
+      const v = r[c]||'—';
+      const bc = statusBadge(c,v);
+      return `<td>${bc?`<span class="badge ${bc}">${esc(v)}</span>`:esc(v)}</td>`;
+    }).join('')}</tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function renderRecs(recs) {
+  if (!recs.length) { $('recsBody').innerHTML = '<p class="empty-msg">No recommendations.</p>'; return; }
+  $('recsBody').innerHTML = recs.map(r => `
+    <div class="rec-card rec-${r.type}">
+      <div class="rec-icon">${r.icon}</div>
+      <div class="rec-content">
+        <div class="rec-title">${esc(r.title)}</div>
+        <div class="rec-body">${esc(r.body)}</div>
+      </div>
+      ${r.action ? `<button class="ask-btn ghost-btn xs rec-ask" data-p="${esc(r.action)}">Ask AI →</button>` : ''}
+    </div>`).join('');
+  $('recsBody').querySelectorAll('.rec-ask').forEach(b =>
+    b.addEventListener('click', () => send(b.dataset.p)));
+}
+
+// Share recommendations
+$('shareRecsBtn').addEventListener('click', async () => {
+  if (!S.dashData) return;
+  const recs = S.dashData.recommendations || [];
+  const text = [
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '  Salesforce AI Agent — Recommendations',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '',
+    ...recs.map(r => [`${r.icon} ${r.title}`, `   ${r.body}`, '']).flat(),
+    `Generated: ${new Date().toLocaleString()}`,
+  ].join('\n');
+  $('shareText').value = text;
+  $('shareModal').hidden = false;
+});
+
+// "Ask AI →" buttons on dashboard cards
+document.addEventListener('click', e => {
+  const b = e.target.closest('.ask-btn[data-prompt]');
+  if (b) send(b.dataset.prompt);
+});
+
+/* ─── markdown renderer ─────────────────────────────────────── */
+function md(t) {
+  if (!t) return '';
+  let h = esc(t);
+  h = h.replace(/```(\w*)\n?([\s\S]*?)```/g, (_,lang,code) =>
+    `<pre class="codeblock${lang?' lang-'+lang:''}" ><code>${code.trim()}</code></pre>`);
+  h = h.replace(/`([^`]+)`/g, '<code class="icode">$1</code>');
+  h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/\*(.+?)\*/g,     '<em>$1</em>');
+  h = h.replace(/^### (.+)$/gm,   '<h3>$1</h3>');
+  h = h.replace(/^## (.+)$/gm,    '<h2>$1</h2>');
+  h = h.replace(/^# (.+)$/gm,     '<h1>$1</h1>');
+  h = h.replace(/^[-•] (.+)$/gm,  '<li>$1</li>');
+  h = h.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+  h = h.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+  h = mdTables(h);
+  h = h.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+  return '<p>'+h+'</p>';
+}
+function mdTables(h) {
+  return h.replace(/((\|.+\|\n?)+)/g, m => {
+    const rows = m.trim().split('\n').filter(r=>r.trim());
+    if (rows.length < 2) return m;
+    let o = '<div class="md-tw"><table class="md-t">';
+    rows.forEach((row,i) => {
+      if (/^\|[-| :]+\|$/.test(row.trim())) return;
+      const cells = row.split('|').filter((_,j,a)=>j>0&&j<a.length-1);
+      const tag = i===0?'th':'td';
+      o += '<tr>'+cells.map(c=>`<${tag}>${c.trim()}</${tag}>`).join('')+'</tr>';
+    });
+    return o+'</table></div>';
+  });
+}
+
+/* ─── utils ─────────────────────────────────────────────────── */
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function now()         { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function scrollEnd()   { ct.scrollTo({top:ct.scrollHeight,behavior:'smooth'}); }
+function shuffle(a)    { return [...a].sort(()=>Math.random()-.5); }
+function fmtTool(n)    { return n.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+function fmtAmount(n)  {
+  if (n >= 1_000_000) return (n/1_000_000).toFixed(1)+'M';
+  if (n >= 1_000)     return (n/1_000).toFixed(0)+'K';
+  return String(Math.round(n));
+}
+function setInput(on) {
+  inp.disabled = !on;
+  $('sendBtn').disabled = !on || inp.value.trim().length===0;
+  if (on) inp.focus();
+}
+
+/* ─── toast ─────────────────────────────────────────────────── */
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  $('toastStack').appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),300); }, 3000);
+}
+
+/* ─── mini KPI (right panel) ────────────────────────────────── */
+async function loadMiniKpi() {
+  try {
+    const d = await fetch('/api/dashboard').then(r => r.json());
+    const high = d.cases?.by_priority?.High || 0;
+    const items = [
+      { icon: '🎫', label: 'Open Cases',    val: d.cases?.open_total ?? '—',  tone: 'blue'  },
+      { icon: '🚨', label: 'High Priority', val: high,                         tone: high > 0 ? 'red' : 'blue' },
+      { icon: '💼', label: 'Pipeline',      val: d.pipeline?.total_value ? '$'+fmtAmount(d.pipeline.total_value) : '$0', tone: 'green' },
+      { icon: '👥', label: 'Open Leads',    val: d.leads?.total ?? '—',        tone: 'amber' },
+    ];
+    $('miniKpiBody').innerHTML =
+      '<div class="gauge-grid">' +
+      items.map(i => `
+        <div class="gauge gauge-${i.tone}">
+          <div class="gauge-top">
+            <span class="gauge-icon">${i.icon}</span>
+            <span class="gauge-dot"></span>
+          </div>
+          <div class="gauge-val">${i.val}</div>
+          <div class="gauge-lbl">${i.label}</div>
+        </div>`).join('') +
+      '</div>';
+  } catch {
+    $('miniKpiBody').innerHTML = '<div class="right-empty">Unavailable</div>';
+  }
+}
+
+/* ─── boot ──────────────────────────────────────────────────── */
+(async () => {
+  await Promise.all([checkHealth(), loadSuggestions()]);
+  loadMiniKpi();   // non-blocking, right panel
+  inp.focus();
+})();
+</script>
+</body>
+</html>
