@@ -1,0 +1,8 @@
+# Lint configuration lives in ruff.toml. Security lint (bandit rules) runs in CI:
+#   ruff check app --select S --ignore S101,S105
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]

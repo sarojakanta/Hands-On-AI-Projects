@@ -1,0 +1,77 @@
+# Production-style stack: PostgreSQL + migrations + API + dashboard.
+# Required in .env (compose refuses to start without them):
+#   POSTGRES_PASSWORD, JWT_SECRET (>= 32 random chars), BOOTSTRAP_ADMIN_PASSWORD
+x-app: &app
+  build: .
+  env_file:
+    - path: .env
+      required: false
+  environment: &app-env
+    APP_ENV: production
+    LOG_JSON: "true"
+    AUTO_CREATE_TABLES: "false"            # schema is managed by Alembic (migrate service)
+    DATABASE_URL: postgresql://itsm:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/itsm
+    JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env (>= 32 random characters)}
+    BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+    OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: itsm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: itsm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U itsm -d itsm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *app
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma:/app/data/chroma
+      - knowledge:/app/data/knowledge
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  dashboard:
+    <<: *app
+    command: ["streamlit", "run", "dashboard/app.py", "--server.address=0.0.0.0", "--server.port=8501",
+              "--server.headless=true", "--browser.gatherUsageStats=false"]
+    environment:
+      <<: *app-env
+      API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  chroma:
+  knowledge:

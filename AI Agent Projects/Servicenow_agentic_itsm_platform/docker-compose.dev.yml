@@ -1,0 +1,17 @@
+# Development overrides. Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# Never use this file for a production deployment.
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"      # connect with psql/DBeaver from the host
+  migrate:
+    environment:
+      APP_ENV: development
+  api:
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: DEBUG
+  dashboard:
+    environment:
+      APP_ENV: development
